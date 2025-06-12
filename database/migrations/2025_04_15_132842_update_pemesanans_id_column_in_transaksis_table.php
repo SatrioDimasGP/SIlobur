@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-        public function up()
+    public function up()
     {
         Schema::table('transaksis', function (Blueprint $table) {
             // Drop foreign key & column lama jika sudah terhubung
