@@ -6,31 +6,36 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
     {
-        Schema::table('transaksis', function (Blueprint $table) {
-            // Drop foreign key & column lama jika sudah terhubung
-            if (Schema::hasColumn('transaksis', 'pemesanan_id')) {
-                $table->dropColumn('pemesanan_id');
-            }
+        // Rename kolom dengan aman
+        if (Schema::hasColumn('transaksis', 'pemesanan_id')) {
+            Schema::table('transaksis', function (Blueprint $table) {
+                $table->renameColumn('pemesanan_id', 'pemesanans_id');
+            });
+        }
 
-            // Tambahkan kolom baru
-            $table->unsignedBigInteger('pemesanans_id')->after('id'); // sesuaikan posisinya jika perlu
-            $table->foreign('pemesanans_id')->references('id')->on('pemesanans')->onDelete('cascade');
+        // Tambahkan FK baru jika perlu
+        Schema::table('transaksis', function (Blueprint $table) {
+            if (!Schema::hasColumn('transaksis', 'pemesanans_id')) return;
+
+            // Cek apakah FK belum ada (gunakan try-catch agar tidak crash)
+            try {
+                $table->foreign('pemesanans_id')->references('id')->on('pemesanans')->onDelete('cascade');
+            } catch (\Throwable $e) {
+                // FK mungkin sudah ada — abaikan
+            }
         });
     }
 
     public function down()
     {
-        Schema::table('pemesanans', function (Blueprint $table) {
-            $table->dropForeign(['pemesanans_id']);
-            $table->dropColumn('pemesanans_id');
-
-            // Tambahkan kembali kolom lama jika ingin rollback
-            $table->unsignedBigInteger('pemesanan_id')->after('id');
-        });
+        // Rollback rename
+        if (Schema::hasColumn('transaksis', 'pemesanans_id')) {
+            Schema::table('transaksis', function (Blueprint $table) {
+                $table->dropForeign(['pemesanans_id']);
+                $table->renameColumn('pemesanans_id', 'pemesanan_id');
+            });
+        }
     }
 };
