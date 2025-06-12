@@ -8,25 +8,19 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     public function up(): void
     {
-        // Rename kolom jika masih bernama 'bloks_id'
-        if (Schema::hasColumn('blok_gantangans', 'bloks_id')) {
-            Schema::table('blok_gantangans', function (Blueprint $table) {
-                $table->renameColumn('bloks_id', 'blok_id');
-            });
-        }
-
-        // Pastikan kolom bertipe BIGINT UNSIGNED
+        // Pastikan kolom sudah bertipe BIGINT UNSIGNED
         DB::statement('ALTER TABLE blok_gantangans MODIFY blok_id BIGINT UNSIGNED NOT NULL');
         DB::statement('ALTER TABLE blok_gantangans MODIFY gantangan_id BIGINT UNSIGNED NOT NULL');
 
-        // Drop index unik jika ada
+        // Drop index unik lama jika ada
         try {
             Schema::table('blok_gantangans', function (Blueprint $table) {
                 $table->dropUnique('blok_gantangans_2_unique');
             });
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
-        // Tambah index & FK baru
+        // Tambahkan FK dan index gabungan
         Schema::table('blok_gantangans', function (Blueprint $table) {
             $table->unique(['blok_id', 'gantangan_id'], 'blok_gantangans_2_unique');
             $table->foreign('blok_id')->references('id')->on('bloks')->onDelete('cascade');
@@ -36,18 +30,12 @@ return new class extends Migration {
 
     public function down(): void
     {
-        // Drop FK & index
         Schema::table('blok_gantangans', function (Blueprint $table) {
             $table->dropForeign(['blok_id']);
             $table->dropForeign(['gantangan_id']);
             $table->dropUnique('blok_gantangans_2_unique');
         });
 
-        // Rename kembali jika ada
-        if (Schema::hasColumn('blok_gantangans', 'blok_id')) {
-            Schema::table('blok_gantangans', function (Blueprint $table) {
-                $table->renameColumn('blok_id', 'bloks_id');
-            });
-        }
+        // Tidak ada rename karena kolom awal memang sudah 'blok_id'
     }
 };
