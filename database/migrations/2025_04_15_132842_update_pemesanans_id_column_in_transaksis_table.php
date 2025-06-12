@@ -3,39 +3,46 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
+    /**
+     * Jalankan migrasi.
+     */
     public function up()
     {
-        // Rename kolom dengan aman
+        // Rename kolom jika ada
         if (Schema::hasColumn('transaksis', 'pemesanan_id')) {
             Schema::table('transaksis', function (Blueprint $table) {
                 $table->renameColumn('pemesanan_id', 'pemesanans_id');
             });
         }
 
-        // Tambahkan FK baru jika perlu
-        Schema::table('transaksis', function (Blueprint $table) {
-            if (!Schema::hasColumn('transaksis', 'pemesanans_id')) return;
+        // Pastikan kolom bertipe BIGINT UNSIGNED NOT NULL
+        DB::statement('ALTER TABLE transaksis MODIFY pemesanans_id BIGINT UNSIGNED NOT NULL');
 
-            // Cek apakah FK belum ada (gunakan try-catch agar tidak crash)
-            try {
-                $table->foreign('pemesanans_id')->references('id')->on('pemesanans')->onDelete('cascade');
-            } catch (\Throwable $e) {
-                // FK mungkin sudah ada — abaikan
-            }
+        // Tambahkan foreign key
+        Schema::table('transaksis', function (Blueprint $table) {
+            $table->foreign('pemesanans_id')
+                ->references('id')
+                ->on('pemesanans')
+                ->onDelete('cascade');
         });
     }
 
+    /**
+     * Batalkan migrasi.
+     */
     public function down()
     {
-        // Rollback rename
-        if (Schema::hasColumn('transaksis', 'pemesanans_id')) {
-            Schema::table('transaksis', function (Blueprint $table) {
-                $table->dropForeign(['pemesanans_id']);
-                $table->renameColumn('pemesanans_id', 'pemesanan_id');
-            });
-        }
+        // Drop FK dan rename kembali
+        Schema::table('transaksis', function (Blueprint $table) {
+            $table->dropForeign(['pemesanans_id']);
+            $table->renameColumn('pemesanans_id', 'pemesanan_id');
+        });
+
+        // (Opsional) Pastikan tipe ulang
+        DB::statement('ALTER TABLE transaksis MODIFY pemesanan_id BIGINT UNSIGNED NOT NULL');
     }
 };
