@@ -1,0 +1,542 @@
+:root {
+    --primary: #3846C3;
+    --secondary: #3846C3;
+    --warning: #FFB800;
+    --dark: #FF6B6B;
+    --light: #8C6FF0;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Text:wght@400;500;600&display=swap');
+
+body {
+    font-family: 'Lexend', sans-serif;
+    color: #333;
+}
+
+.font-lexend {
+    font-family: 'Lexend', sans-serif;
+}
+
+.font-redhat {
+    font-family: 'Red Hat Text', sans-serif;
+}
+
+.hero {
+    background-color: var(--primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../images/pattern.png');
+    opacity: 0.1;
+    z-index: 1;
+}
+
+.hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.card {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.btn {
+    border-radius: 30px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-success {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-success:hover {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-warning {
+    background-color: var(--warning);
+    border-color: var(--warning);
+    color: #FFFFFF;
+}
+
+.start-now-btn {
+    border-radius: 8px !important;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 12px 30px !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.start-now-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.navbar {
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand img {
+    height: 70px;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: #424242;
+    margin: 0 5px;
+}
+
+.nav-link:hover {
+    color: var(--primary);
+}
+
+.auth-btn {
+    display: inline-block;
+    padding: 8px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.sign-in {
+    background-color: #FFFFFF;
+    color: var(--primary);
+    border: none;
+}
+
+.sign-in:hover {
+    background-color: #e8e8e8;
+    color: var(--primary);
+}
+
+.sign-up {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+}
+
+.sign-up:hover {
+    background-color: #299E63;
+    color: white;
+}
+
+.bg-success {
+    background-color: var(--primary) !important;
+}
+
+.stats-container {
+    margin-top: 2rem;
+}
+
+.stats-card {
+    background-color: var(--primary);
+    border-radius: 10px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+}
+
+.stats-divider {
+    width: 2px;
+    height: 60px;
+    background-color: #FFFFFF;
+    border-radius: 1px;
+}
+
+.stat-value {
+    font-family: 'Lexend', sans-serif;
+    font-weight: 500;
+    font-size: 1.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-family: 'Red Hat Text', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+footer {
+    border-top: 5px solid var(--primary);
+    font-weight: normal;
+    /* garis hijau */
+}
+
+/* Normalisasi font di footer */
+.footer-custom {
+    font-weight: normal;
+    background-color: var(--secondary) !important;
+}
+
+.footer-custom ul li,
+.footer-custom ul li a,
+.footer-custom p {
+    font-weight: normal;
+}
+
+/* Tetap buat heading footer sedikit bold */
+.footer-custom h5 {
+    font-weight: 350;
+}
+
+footer a:hover {
+    color: var(--primary) !important;
+}
+
+.img-fluid {
+    transition: all 0.5s ease;
+}
+
+.img-fluid:hover {
+    transform: scale(1.02);
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.cta {
+    background-color: var(--primary);
+    border-radius: 10px;
+    padding: 40px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    .hero {
+        text-align: center;
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .hero img {
+        margin-top: 30px;
+    }
+
+    .stats-card {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .stat-item {
+        margin: 0.5rem 0;
+    }
+
+    .stats-divider {
+        width: 80%;
+        height: 1px;
+        margin: 0.5rem 0;
+    }
+}
+
+.card .fas {
+    transition: all 0.3s ease;
+}
+
+.card:hover .fas {
+    transform: scale(1.2);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.icon-circle i {
+    color: white;
+    font-size: 24px;
+}
+
+#layanan .row {
+    align-items: center;
+}
+
+#layanan .col-md-6 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.vertical-divider {
+    width: 6px;
+    height: 250px;
+    background-color: var(--primary, #007bff);
+    display: inline-block;
+    margin: 0 16px;
+}
+
+#layanan {
+    position: relative;
+    padding-bottom: 155px !important;
+    /* atau lebih jika masih ketimpa */
+    z-index: 1;
+}
+
+#tps {
+    position: relative;
+    z-index: 0;
+}
+
+/* TPS Section Styling */
+#tps {
+    padding-top: 80px;
+    padding-bottom: 80px;
+}
+
+.tps-card {
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.tps-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* For smooth scrolling when clicking navbar links */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Add padding to account for fixed navbar if you have one */
+@media (max-width: 768px) {
+    #tps {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+}
+
+/* Scroll smooth & offset */
+html {
+    scroll-behavior: smooth;
+}
+
+#tps {
+    /* scroll-margin-top: 100px;
+    padding: 80px 0; */
+    padding: 0;
+    margin: 0;
+}
+
+/* Wrapper Section */
+.tps-wrapper {
+    background-color: var(--primary);
+    background-image: url('/assets/images/patern.png');
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: contain  ;
+    padding: 70px;
+    min-height: 100px;
+    position: relative;
+    overflow: hidden;
+}
+
+
+
+/* Header Text */
+.tps-header h2 {
+    font-weight: 700;
+    font-size: 32px;
+}
+
+.tps-header p {
+    font-size: 16px;
+    margin-bottom: 40px;
+}
+
+/* TPS Card */
+.tps-card {
+    background: #fff;
+    border: 3px solid #299E63;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.tps-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.tps-icon {
+    width: 36px;
+    height: auto;
+}
+
+.tps-title {
+    font-weight: 600;
+    color: #299E63;
+    margin: 0;
+    font-size: 16px;
+}
+
+/* Link */
+.lihat-semua {
+    color: white;
+    font-weight: normal;
+    text-decoration: none;
+    float: right;
+    margin-top: 20px;
+}
+
+.recycle-logo img {
+    width: 50px;
+    height: auto;
+}
+
+.recycle-bg {
+    position: absolute;
+    top: 20px;
+    right: 0;
+    width: 200px;
+    height: auto;
+    opacity: 0.15;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Make sure your tps-wrapper has proper positioning */
+.tps-wrapper {
+    background-color: var(--primary);
+    padding: 60px;
+    min-height: 450px;
+    position: relative;
+    overflow: hidden;
+}
+
+body {
+    border-bottom: none !important;
+}
+
+/* Edukasi Section Styles */
+#edukasi {
+    padding: 60px 0;
+}
+
+#edukasi h2 {
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+#edukasi .card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+#edukasi .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+#edukasi .card-body {
+    padding: 1.25rem;
+}
+
+#edukasi .card-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-family: 'Lexend', sans-serif;
+}
+
+#edukasi .card-text {
+    font-family: 'Red Hat Text', sans-serif; font-size: 0.9rem;
+}
+
+#edukasi img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#edukasi .text-muted {
+    font-family: 'Red Hat Text', sans-serif;
+    font-size: 0.8rem;
+}
+
+/* Fix for staggered layout on mobile */
+@media (max-width: 767px) {
+    #edukasi .row>div {
+        margin-bottom: 1.5rem;
+    }
+
+    #edukasi .card-title {
+        font-size: 0.95rem;
+    }
+
+    #edukasi .card-text {
+        font-size: 0.85rem;
+    }
+}
+
+
+#edukasi p.redhat-font {
+    font-weight: 400;
+    /* Pastikan subtitle menggunakan font-weight normal */
+    margin-bottom: 1.5rem;
+}
+
+#layanan {
+    font-family: 'Red Hat Text', sans-serif;
+}

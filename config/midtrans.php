@@ -1,0 +1,10 @@
+<?php
+
+return [
+    'MIDTRANS_SERVER_KEY' => env('MIDTRANS_SERVER_KEY'),
+    'MIDTRANS_CLIENT_KEY' => env('MIDTRANS_CLIENT_KEY'),
+    'MIDTRANS_SNAP_URL' => env('MIDTRANS_SNAP_URL'),
+    'MIDTRANS_IS_PRODUCTION' => false,
+    'MIDTRANS_IS_SANITIZED' => true,
+    'MIDTRANS_IS_3DS' => true,
+];
