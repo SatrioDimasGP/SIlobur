@@ -23,8 +23,21 @@ class PenjadwalanJuriController extends Controller
         $juris = User::role('juri')->get(); // ✅ menggunakan nama role
         $penugasanJuri = JuriTugas::with(['user', 'lomba', 'blok'])
             ->whereNull('deleted_at')
-            ->get(); // Mengambil data tugas juri yang sudah ada
-
+            ->whereHas('user')   // hanya jika relasi user masih ada
+            ->whereHas('lomba')  // hanya jika relasi lomba masih ada
+            ->whereHas('blok')   // hanya jika relasi blok masih ada
+            ->get();
+        // // dd($penugasanJuri;
+        // //  foreach ($penugasanJuri as $penugasan) {
+        // //         if (!$penugasan->lomba || !$penugasan->user || !$penugasan->blok) {
+        // //             dd([
+        // //                 'id' => $penugasan->id,
+        // //                 'lomba' => $penugasan->lomba,
+        // //                 'user' => $penugasan->user,
+        // //                 'blok' => $penugasan->blok,
+        // //             ]);
+        // //         }
+        // //     }
         return view('korlap.penugasan_juri.index', compact('lombas', 'bloks', 'juris', 'penugasanJuri'));
     }
 
