@@ -118,6 +118,7 @@
                                     <th>#</th>
                                     <th>Nama</th>
                                     <th>Lomba</th>
+                                    <th>Burung</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -127,6 +128,8 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $blok->nama }}</td>
                                         <td>{{ $blok->lomba->nama ?? '-' }}</td>
+                                        <td>{{ $blok->burung->jenisBurung->nama ?? '-' }} -
+                                            {{ $blok->burung->kelas->nama ?? '-' }}</td>
                                         <td>
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-outline-info dropdown-toggle"
@@ -134,7 +137,8 @@
                                                     <i class="fas fa-cog"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item"
+                                                    <li>
+                                                        <a class="dropdown-item"
                                                             href="{{ route('konfigurasi-blok.edit', $blok->id) }}">Edit</a>
                                                     </li>
                                                     <li>
@@ -150,7 +154,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">Belum ada blok.</td>
+                                        <td colspan="5" class="text-center">Belum ada blok.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -172,7 +176,9 @@
                                     <option value="">-- Pilih Blok --</option>
                                     @foreach ($bloks as $blok)
                                         <option value="{{ $blok->id }}">{{ $blok->nama }} -
-                                            {{ $blok->lomba->nama ?? '-' }}</option>
+                                            {{ $blok->lomba->nama ?? '-' }} -
+                                            {{ $blok->burung->jenisBurung->nama ?? '?' }} - {{ $blok->burung->kelas->nama ?? '?' }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 @error('blok_id')

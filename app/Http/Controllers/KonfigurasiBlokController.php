@@ -17,7 +17,7 @@ class KonfigurasiBlokController extends Controller
     {
         $search = $request->get('search');
 
-        $bloks = Blok::with('lomba')->get();
+        $bloks = Blok::with('lomba', 'burung')->get();
         $lombas = Lomba::all();
         $gantangans = Gantangan::all();
 
