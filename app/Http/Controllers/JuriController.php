@@ -104,9 +104,13 @@ class JuriController extends Controller
             return response()->json(['bloks' => []]);
         }
 
+        $burungInKelas = Burung::where('kelas_id', $kelas_id)
+            ->where('jenis_burung_id', $jenis_burung_id)
+            ->get()->pluck('id');
         // Ambil blok yang ditugaskan ke juri di lomba
         $bloks = Blok::where('lomba_id', $lomba_id)
             ->whereNull('deleted_at')
+            ->whereIn('burung_id', $burungInKelas)
             ->whereIn('id', function ($query) use ($userId, $lomba_id) {
                 $query->select('blok_id')
                     ->from('juri_tugas')
@@ -115,6 +119,7 @@ class JuriController extends Controller
                     ->whereNull('deleted_at');
             })
             ->get();
+        // return $bloks;
 
         // Status penilaian tahap ajuan
         $tahapAjuan = Tahap::where('nama', 'Ajuan')->first();
