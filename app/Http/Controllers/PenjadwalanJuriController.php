@@ -21,7 +21,12 @@ class PenjadwalanJuriController extends Controller
         $lombas = Lomba::all();
         $bloks = Blok::all();
         $juris = User::role('juri')->get(); // ✅ menggunakan nama role
-        $penugasanJuri = JuriTugas::with(['user', 'lomba', 'blok'])
+        $penugasanJuri = JuriTugas::with([
+            'user',
+            'lomba',
+            'blok.burung.jenisBurung',
+            'blok.burung.kelas'
+        ])
             ->whereNull('deleted_at')
             ->whereHas('user')   // hanya jika relasi user masih ada
             ->whereHas('lomba')  // hanya jika relasi lomba masih ada
