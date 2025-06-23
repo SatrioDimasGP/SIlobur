@@ -433,7 +433,6 @@ class JuriController extends Controller
         Log::info('Memulai proses mendapatkan nomor lolos koncer', compact('lombaId', 'jenisBurungId', 'kelasId', 'juriId'));
 
         if (!$lombaId || !$jenisBurungId || !$kelasId) {
-            Log::error('Input tidak lengkap');
             return response()->json([
                 'status' => 'error',
                 'message' => 'Parameter lomba_id, jenis_burung_id, dan kelas_id wajib diisi',
@@ -442,44 +441,36 @@ class JuriController extends Controller
 
         $tahapAjuanId = Tahap::where('nama', 'Ajuan')->value('id');
         $tahapKoncerId = Tahap::where('nama', 'Koncer')->value('id');
+
         $benderaHijauId = Bendera::where('nama', 'Hijau')->value('id');
         $benderaMerahId = Bendera::where('nama', 'Merah')->value('id');
         $benderaBiruId = Bendera::where('nama', 'Biru')->value('id');
         $benderaKuningId = Bendera::where('nama', 'Kuning')->value('id');
 
-        // Hitung kebutuhan penilaian tahap Ajuan
-        $jumlahJuri = JuriTugas::where('lomba_id', $lombaId)->distinct('user_id')->count('user_id');
+        // Ambil daftar burung
+        $burungIds = Burung::where('jenis_burung_id', $jenisBurungId)
+            ->where('kelas_id', $kelasId)
+            ->pluck('id');
 
+        // Ambil blok yang relevan
         $blokIds = Blok::where('lomba_id', $lombaId)
-            ->whereHas('lomba.kelas.burungs', function ($q) use ($jenisBurungId, $kelasId) {
-                $q->where('jenis_burung_id', $jenisBurungId)
-                    ->where('kelas_id', $kelasId);
-            })
+            ->whereIn('burung_id', $burungIds)
             ->pluck('id');
 
-        $blokGantanganIds = BlokGantangan::whereIn('blok_id', $blokIds)
-            ->whereHas('blok.lomba.kelas.burungs', function ($q) use ($jenisBurungId, $kelasId) {
-                $q->where('jenis_burung_id', $jenisBurungId)
-                    ->where('kelas_id', $kelasId);
-            })
-            ->pluck('id');
+        // Ambil blok gantangan yang relevan
+        $blokGantanganIds = BlokGantangan::whereIn('blok_id', $blokIds)->pluck('id');
 
+        // Hitung kebutuhan penilaian Ajuan
+        $jumlahJuri = JuriTugas::where('lomba_id', $lombaId)->distinct('user_id')->count('user_id');
         $totalSeharusnya = $jumlahJuri * $blokGantanganIds->count();
 
         $terisi = Penilaian::where('lomba_id', $lombaId)
             ->where('tahap_id', $tahapAjuanId)
             ->whereIn('blok_gantangan_id', $blokGantanganIds)
-            ->whereHas('burung', function ($q) use ($jenisBurungId, $kelasId) {
-                $q->where('jenis_burung_id', $jenisBurungId)
-                    ->where('kelas_id', $kelasId);
-            })
+            ->whereIn('burung_id', $burungIds)
             ->count();
 
-        Log::debug('blokGantanganIds', $blokGantanganIds->toArray());
-        Log::debug('Penilaian Ajuan terisi', ['terisi' => $terisi, 'dibutuhkan' => $totalSeharusnya]);
-
         if ($terisi < $totalSeharusnya) {
-            Log::warning('Penilaian Ajuan belum lengkap', ['total_dibutuhkan' => $totalSeharusnya, 'terisi' => $terisi]);
             return response()->json([
                 'status' => 'success',
                 'menunggu' => true,
@@ -489,20 +480,17 @@ class JuriController extends Controller
             ]);
         }
 
-        // Hitung jumlah bendera hijau per nomor
+        // Hitung bendera hijau per nomor
         $jumlahHijauPerNomor = Penilaian::select('blok_gantangan_id', DB::raw('count(*) as total_hijau'))
+            ->where('lomba_id', $lombaId)
             ->where('tahap_id', $tahapAjuanId)
             ->where('bendera_id', $benderaHijauId)
-            ->where('lomba_id', $lombaId)
-            ->whereHas('burung', function ($query) use ($jenisBurungId, $kelasId) {
-                $query->where('jenis_burung_id', $jenisBurungId)
-                    ->where('kelas_id', $kelasId);
-            })
+            ->whereIn('blok_gantangan_id', $blokGantanganIds)
+            ->whereIn('burung_id', $burungIds)
             ->groupBy('blok_gantangan_id')
             ->get();
 
         if ($jumlahHijauPerNomor->isEmpty()) {
-            Log::warning('Tidak ada nomor lolos koncer ditemukan');
             return response()->json([
                 'status' => 'success',
                 'menunggu' => false,
@@ -513,44 +501,27 @@ class JuriController extends Controller
         }
 
         $maxHijau = $jumlahHijauPerNomor->max('total_hijau');
-        $blokGantanganMaxHijau = $jumlahHijauPerNomor->filter(fn($item) => $item->total_hijau == $maxHijau);
+        $blokGantanganMaxHijau = $jumlahHijauPerNomor->where('total_hijau', $maxHijau);
 
         $blokGantanganLangsungJuara1 = null;
         $blokGantanganIdsKoncer = [];
 
         if ($blokGantanganMaxHijau->count() === 1) {
             $blokGantanganLangsungJuara1 = $blokGantanganMaxHijau->first()->blok_gantangan_id;
-            $blokGantanganIdsKoncer = $jumlahHijauPerNomor->filter(
-                fn($item) => $item->total_hijau == ($maxHijau - 1)
-            )->pluck('blok_gantangan_id')->toArray();
+            $blokGantanganIdsKoncer = $jumlahHijauPerNomor->where('total_hijau', $maxHijau - 1)->pluck('blok_gantangan_id')->toArray();
         } else {
             $blokGantanganIdsKoncer = $blokGantanganMaxHijau->pluck('blok_gantangan_id')->toArray();
         }
 
-        $dataNomor = BlokGantangan::with(['blok.lomba.kelas.burungs.jenisBurung', 'gantangan'])
+        $dataNomor = BlokGantangan::with('gantangan')
             ->whereIn('id', $blokGantanganIdsKoncer)
-            ->whereHas('blok.lomba', fn($q) => $q->where('id', $lombaId))
-            ->whereHas('blok.lomba.kelas', fn($q) => $q->where('id', $kelasId))
-            ->whereHas('blok.lomba.kelas.burungs.jenisBurung', fn($q) => $q->where('id', $jenisBurungId))
             ->get()
-            ->map(function ($item) use (
-                $juriId,
-                $lombaId,
-                $tahapKoncerId,
-                $benderaMerahId,
-                $benderaBiruId,
-                $benderaKuningId,
-                $jenisBurungId,
-                $kelasId
-            ) {
+            ->map(function ($item) use ($juriId, $lombaId, $tahapKoncerId, $burungIds, $benderaMerahId, $benderaBiruId, $benderaKuningId) {
                 $sudahDinilai = Penilaian::where('user_id', $juriId)
                     ->where('lomba_id', $lombaId)
                     ->where('tahap_id', $tahapKoncerId)
                     ->where('blok_gantangan_id', $item->id)
-                    ->whereHas('burung', function ($query) use ($jenisBurungId, $kelasId) {
-                        $query->where('jenis_burung_id', $jenisBurungId)
-                            ->where('kelas_id', $kelasId);
-                    })
+                    ->whereIn('burung_id', $burungIds)
                     ->exists();
 
                 return [
@@ -566,20 +537,11 @@ class JuriController extends Controller
             });
 
         $sudahMenilai = $dataNomor->every(fn($item) => $item['sudah_dinilai']);
-
-        // Urutkan berdasarkan nomor gantangan
         $dataNomor = $dataNomor->sortBy(fn($item) => (int) $item['gantangan']['nomor'])->values();
-
 
         $nomorLangsungJuara1 = null;
         if ($blokGantanganLangsungJuara1) {
-            $item = BlokGantangan::with(['blok.lomba.kelas.burungs.jenisBurung', 'gantangan'])
-                ->where('id', $blokGantanganLangsungJuara1)
-                ->whereHas('blok.lomba', fn($q) => $q->where('id', $lombaId))
-                ->whereHas('blok.lomba.kelas', fn($q) => $q->where('id', $kelasId))
-                ->whereHas('blok.lomba.kelas.burungs.jenisBurung', fn($q) => $q->where('id', $jenisBurungId))
-                ->first();
-
+            $item = BlokGantangan::with('gantangan')->find($blokGantanganLangsungJuara1);
             if ($item) {
                 $nomorLangsungJuara1 = [
                     'id' => $item->id,
@@ -598,6 +560,7 @@ class JuriController extends Controller
             'nomorLolosKoncer' => $dataNomor,
         ]);
     }
+
 
 
     public function storeKoncer(Request $request, $lombaId)
