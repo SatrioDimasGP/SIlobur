@@ -44,6 +44,7 @@ class KonfigurasiBlokController extends Controller
             $existing = Blok::withTrashed()
                 ->where('nama', $request->nama)
                 ->where('lomba_id', $request->lomba_id)
+                ->where('burung_id', $request->burung_id)
                 ->first();
 
             if ($existing) {
