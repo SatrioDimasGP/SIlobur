@@ -77,6 +77,19 @@ class JuriController extends Controller
 
         $lomba = Lomba::with(['kelas.burungs'])->find($lomba_id);
 
+        $filterJuri = JuriTugas::with(['blok.burung'])
+            ->where('user_id', $userId)
+            ->whereHas('blok.burung', function ($query) use ($kelas_id) {
+                $query->where('kelas_id', $kelas_id);
+            })
+            ->get();
+
+        if ($filterJuri->isEmpty()) {
+            return response()->json([
+                'bloks' => []
+            ]);
+        }
+
         // Filter burung sesuai filter
         $filteredBurungs = $lomba->kelas->flatMap(function ($kelas) use ($jenis_burung_id, $kelas_id) {
             return $kelas->burungs->filter(function ($burung) use ($jenis_burung_id, $kelas_id, $kelas) {
@@ -152,21 +165,25 @@ class JuriController extends Controller
     {
         $userId = Auth::id();
         $lombaAktif = Lomba::findOrFail($lombaId);
-        $blok = Blok::with('gantangans.gantangan')->where('id', $blokId)->firstOrFail();
+
+        // Load blok dengan relasi gantangans dan gantangan
+        $blok = Blok::with(['gantangans.gantangan'])->where('id', $blokId)->firstOrFail();
+
         $cekTugas = JuriTugas::where('user_id', $userId)
             ->where('blok_id', $blokId)
             ->where('lomba_id', $lombaAktif->id)
             ->exists();
 
-        // dd($request->all());
         if (!$cekTugas) {
             abort(403, 'Anda tidak memiliki akses ke blok ini.');
         }
 
         $benderas = Bendera::all();
 
-        // Ambil daftar Gantangan dari Blok yang sedang dipilih
-        $gantangans = $blok->gantangans->pluck('gantangan')->flatten();
+        // ✅ Sorting berdasarkan nomor gantangan
+        $blok->gantangans = $blok->gantangans->sortBy(function ($item) {
+            return $item->gantangan->nomor;
+        })->values(); // reset key agar foreach tidak aneh
 
         return view('juri.ajuan.show', [
             'blok' => $blok,
@@ -174,7 +191,7 @@ class JuriController extends Controller
             'benderas' => $benderas,
             'lombaId' => $lombaAktif->id,
             'blokId' => $blok->id,
-            'gantangans' => $gantangans, // <-- ini WAJIB ditambahkan
+            'gantangans' => $blok->gantangans->pluck('gantangan')->flatten(), // tidak wajib sebenarnya
         ]);
     }
     // Menampilkan nomor gantangan dalam blok tertentu untuk tahap ajuan
@@ -276,7 +293,6 @@ class JuriController extends Controller
         return view('juri.koncer.index', compact('lombas'));
     }
 
-    // Menampilkan daftar nomor gantangan untuk tahap koncer
     public function koncerShow($lombaId)
     {
         $user = Auth::user(); // Juri yang sedang login
@@ -288,15 +304,35 @@ class JuriController extends Controller
                 $query->where('user_id', $user->id);
             })
             ->first();
+        // dd($user, $lomba);
+
 
         if (!$lomba) {
-            Log::warning('Lomba tidak ditemukan untuk juri', ['user_id' => $user->id, 'lomba_id' => $lombaId]);
             return view('juri.koncer.show', [
+                'lomba' => null, // Tambahkan ini!
                 'nomorLolosKoncer' => [],
                 'menunggu' => true,
-                'jenisBurungs' => JenisBurung::all(), // Ambil data jenis burung
+                'jenisBurungs' => collect(),
+                'nomorDetail' => [],
+                'benderas' => [],
             ]);
         }
+
+
+        // Ambil semua kelas di lomba ini
+        $kelas = $lomba->kelas;
+        $kelasIds = $kelas->pluck('id');
+
+        // Ambil semua burung yang terkait dengan kelas tersebut
+        $burungs = \App\Models\Burung::whereIn('kelas_id', $kelasIds)
+            ->whereNull('deleted_at')
+            ->get();
+
+        // Ambil jenis burung unik dari burungs
+        $jenisBurungIds = $burungs->pluck('jenis_burung_id')->unique();
+        $jenisBurungs = \App\Models\JenisBurung::whereIn('id', $jenisBurungIds)
+            ->whereNull('deleted_at')
+            ->get();
 
         // Hitung jumlah juri & blok
         $jumlahJuri = JuriTugas::where('lomba_id', $lomba->id)
@@ -307,6 +343,7 @@ class JuriController extends Controller
         $totalPenilaianSeharusnya = $jumlahJuri * $totalBlok;
 
         Log::info('Jumlah juri: ' . $jumlahJuri . ' - Total Blok: ' . $totalBlok, ['lomba_id' => $lombaId]);
+
         // Hitung total penilaian tahap Ajuan
         $penilaianTerkumpul = Penilaian::where('lomba_id', $lomba->id)
             ->whereHas('tahap', fn($q) => $q->where('nama', 'Ajuan'))
@@ -322,8 +359,8 @@ class JuriController extends Controller
                 'nomorLolosKoncer' => [],
                 'nomorDetail' => [],
                 'benderas' => [],
-                // 'menunggu' => true,
-                'jenisBurungs' => JenisBurung::all(), // Ambil data jenis burung
+                'jenisBurungs' => $jenisBurungs,
+                'menunggu' => true,
             ]);
         }
 
@@ -341,7 +378,6 @@ class JuriController extends Controller
 
         Log::info('Jumlah bendera hijau per nomor', ['jumlah_hijau' => $jumlahHijauPerNomor]);
 
-        // Jika tidak ada yang dapat bendera hijau sama sekali
         if ($jumlahHijauPerNomor->isEmpty()) {
             Log::warning('Tidak ada bendera hijau ditemukan', ['lomba_id' => $lomba->id]);
             return view('juri.koncer.show', [
@@ -349,8 +385,8 @@ class JuriController extends Controller
                 'nomorLolosKoncer' => [],
                 'nomorDetail' => [],
                 'benderas' => [],
-                'menunggu' => false, // semua juri sudah nilai, tapi tidak ada yg dapat hijau
-                'jenisBurungs' => JenisBurung::all(), // Ambil data jenis burung
+                'jenisBurungs' => $jenisBurungs,
+                'menunggu' => false,
             ]);
         }
 
@@ -362,7 +398,6 @@ class JuriController extends Controller
             return $item->total_hijau == $maxHijau;
         });
 
-        // Ambil nomor yang lolos koncer (blok_gantangan_id)
         $nomorLolosKoncerIds = $nomorLolosKoncer->pluck('blok_gantangan_id');
 
         // Ambil detail nomor yang lolos koncer
@@ -378,8 +413,8 @@ class JuriController extends Controller
             'nomorLolosKoncer' => $nomorLolosKoncer,
             'nomorDetail' => $nomorDetail,
             'benderas' => $benderas,
+            'jenisBurungs' => $jenisBurungs,
             'menunggu' => false,
-            'jenisBurungs' => JenisBurung::all(), // Ambil data jenis burung
         ]);
     }
 
@@ -526,6 +561,10 @@ class JuriController extends Controller
             });
 
         $sudahMenilai = $dataNomor->every(fn($item) => $item['sudah_dinilai']);
+
+        // Urutkan berdasarkan nomor gantangan
+        $dataNomor = $dataNomor->sortBy(fn($item) => (int) $item['gantangan']['nomor'])->values();
+
 
         $nomorLangsungJuara1 = null;
         if ($blokGantanganLangsungJuara1) {

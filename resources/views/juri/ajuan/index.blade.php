@@ -65,10 +65,10 @@
                     </thead>
                     <tbody>
                         ${data.bloks.map(blok => `
-                                                                            <tr class="border-t">
-                                                                                <td class="px-4 py-2">${blok.nama}</td>
-                                                                                <td class="px-4 py-2">
-                                                                                    ${blok.sudah_dinilai ? `
+                                                                                        <tr class="border-t">
+                                                                                            <td class="px-4 py-2">${blok.nama}</td>
+                                                                                            <td class="px-4 py-2">
+                                                                                                ${blok.sudah_dinilai ? `
                                         <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded w-auto cursor-not-allowed" disabled>
                                             Sudah Dinilai
                                         </button>
@@ -79,9 +79,9 @@
                                             Lakukan Penilaian
                                         </button>
                                     `}
-                                                                                </td>
-                                                                            </tr>
-                                                                        `).join('')}
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    `).join('')}
                     </tbody>
                 `;
                             blokList.appendChild(tbl);
@@ -173,23 +173,23 @@
         </thead>
         <tbody>
             ${data.bloks.map(blok => `
-                                    <tr class="border-t">
-                                        <td class="px-4 py-2">${blok.nama}</td>
-                                        <td class="px-4 py-2">
-                                            ${blok.sudah_dinilai ? `
-                            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded w-auto cursor-not-allowed" disabled>
+                                        <tr class="border-t">
+                                            <td class="px-4 py-2">${blok.nama}</td>
+                                            <td class="px-4 py-2">
+                                                ${blok.sudah_dinilai ? `
+                            <button class="bg-gray-400 text-black font-bold py-2 px-4 rounded w-auto cursor-not-allowed" disabled>
                                 Sudah Dinilai
                             </button>
                         ` : `
                             <button type="button"
-                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-auto"
+                                class="bg-blue-500 hover:bg-blue-700 text-black font-bold py-2 px-4 rounded w-auto"
                                 onclick="window.location.href='/penilaian-ajuan/{{ $lomba->id }}/${blok.id}?jenis_burung_id=${jenisId}&kelas_id=${kelasId}'">
                                 Lakukan Penilaian
                             </button>
                         `}
-                                        </td>
-                                    </tr>
-                                `).join('')}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
         </tbody>
     `;
                     blokList.appendChild(tbl);

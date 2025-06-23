@@ -1,10 +1,16 @@
 @extends('layouts.app')
 
+@push('css')
+    <!-- DataTables -->
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+@endpush
+
 @section('content')
 <div class="container">
     <h1 class="mb-4">Penugasan Juri</h1>
 
-    {{-- Menampilkan semua pesan error validasi --}}
     @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <ul class="mb-0">
@@ -16,7 +22,6 @@
         </div>
     @endif
 
-    {{-- Menampilkan pesan success --}}
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
@@ -24,10 +29,9 @@
         </div>
     @endif
 
-    <!-- Tombol Aksi Tambah -->
+    <!-- Form Tambah Penugasan -->
     <form method="POST" action="{{ route('penjadwalan-juri.store') }}">
         @csrf
-
         <div class="card mb-4">
             <div class="card-header">Penugasan Juri Baru</div>
             <div class="card-body">
@@ -45,7 +49,6 @@
                     <label for="jenis_burung_kelas">Jenis Burung & Kelas:</label>
                     <select id="burung-kelas-select" name="burung_id" class="form-control" required>
                         <option value="">-- Pilih Jenis Burung & Kelas --</option>
-                        {{-- Akan diisi melalui JavaScript --}}
                     </select>
                 </div>
 
@@ -64,11 +67,11 @@
         </div>
     </form>
 
-    <!-- Tabel Daftar Penugasan -->
+    <!-- Tabel Penugasan -->
     <h5 class="mb-3">Daftar Penugasan Juri</h5>
-    <div class="card">
-        <div class="card-body p-0">
-            <table class="table table-bordered mb-0">
+    <div class="card card-primary card-outline">
+        <div class="card-body">
+            <table id="datatable-main" class="table table-bordered table-striped text-sm">
                 <thead>
                     <tr>
                         <th>No</th>
@@ -105,45 +108,74 @@
     </div>
 </div>
 
-<!-- JavaScript untuk konfirmasi hapus -->
+<!-- JS Konfirmasi -->
 <script>
     function confirmDelete() {
         return confirm("Apakah Anda yakin ingin menghapus penugasan ini?");
     }
 </script>
 
-<!-- JavaScript untuk mengisi dropdown -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- JS Dropdown Dinamis -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const lombaSelect = document.getElementById('lomba-select');
-    const burungKelasSelect = document.getElementById('burung-kelas-select');
+    document.addEventListener('DOMContentLoaded', function () {
+        const lombaSelect = document.getElementById('lomba-select');
+        const burungKelasSelect = document.getElementById('burung-kelas-select');
 
-    lombaSelect.addEventListener('change', function () {
-        const lombaId = this.value;
-        burungKelasSelect.innerHTML = '<option value="">-- Memuat data... --</option>';
+        lombaSelect.addEventListener('change', function () {
+            const lombaId = this.value;
+            burungKelasSelect.innerHTML = '<option value="">-- Memuat data... --</option>';
 
-        if (lombaId) {
-            fetch(`/penjadwalan-juri/get-jenis-burung-kelas/${lombaId}`)
-                .then(response => response.json())
-                .then(data => {
-                    burungKelasSelect.innerHTML = '<option value="">-- Pilih Jenis Burung & Kelas --</option>';
-                    data.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.id;
-                        option.text = item.label;
-                        burungKelasSelect.appendChild(option);
+            if (lombaId) {
+                fetch(`/penjadwalan-juri/get-jenis-burung-kelas/${lombaId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        burungKelasSelect.innerHTML = '<option value="">-- Pilih Jenis Burung & Kelas --</option>';
+                        data.forEach(item => {
+                            const option = document.createElement('option');
+                            option.value = item.id;
+                            option.text = item.label;
+                            burungKelasSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        burungKelasSelect.innerHTML = '<option value="">Gagal memuat data</option>';
+                        console.error(error);
                     });
-                })
-                .catch(error => {
-                    burungKelasSelect.innerHTML = '<option value="">Gagal memuat data</option>';
-                    console.error(error);
-                });
-        } else {
-            burungKelasSelect.innerHTML = '<option value="">-- Pilih Jenis Burung & Kelas --</option>';
-        }
+            } else {
+                burungKelasSelect.innerHTML = '<option value="">-- Pilih Jenis Burung & Kelas --</option>';
+            }
+        });
     });
-});
 </script>
-
 @endsection
+
+@push('scripts')
+<!-- jQuery & DataTables -->
+<script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+
+<script>
+    $(function () {
+        $('#datatable-main').DataTable({
+            responsive: true,
+            autoWidth: false,
+            lengthChange: true,
+            ordering: true,
+            pageLength: 10,
+            language: {
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ data per halaman",
+                zeroRecords: "Data tidak ditemukan",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                infoEmpty: "Tidak ada data",
+                infoFiltered: "(difilter dari _MAX_ total data)"
+            },
+            columnDefs: [
+                { orderable: false, targets: [4] }
+            ]
+        });
+    });
+</script>
+@endpush

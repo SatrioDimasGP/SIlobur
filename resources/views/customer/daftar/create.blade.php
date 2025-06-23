@@ -1,11 +1,21 @@
 @extends('layouts.app')
 
+@push('css')
 <style>
+#daftar-gantangan-wrapper {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-bottom: 20px;
+}
+
 #daftar-gantangan > div {
     display: flex;
     gap: 10px;
     margin-bottom: 10px;
+    flex-wrap: wrap;
 }
+
 .gantangan-btn {
     width: 60px;
     height: 60px;
@@ -14,7 +24,9 @@
     align-items: center;
     display: flex;
     border-radius: 10px;
+    white-space: nowrap;
 }
+
 #cart-popup {
     position: fixed;
     top: 80px;
@@ -26,10 +38,11 @@
     border-left: 2px solid #ccc;
     box-shadow: -2px 0 5px rgba(0,0,0,0.1);
     padding: 15px;
-    z-index: 999;
+    z-index: 1050;
     display: none;
 }
 </style>
+@endpush
 
 @section('content')
 <div class="container">
@@ -71,10 +84,14 @@
 
     <div id="pilihan-gantangan" class="mb-3" style="display: none;">
         <label class="form-label">Pilih Gantangan</label>
-        <div id="daftar-gantangan"></div>
+        <div id="daftar-gantangan-wrapper">
+            <div id="daftar-gantangan"></div>
+        </div>
     </div>
 </div>
+@endsection
 
+@push('js')
 <script>
     const jenisSelect = document.getElementById('jenis_burung_id');
     const kelasSelect = document.getElementById('kelas_id');
@@ -84,8 +101,8 @@
     const finalInputs = document.getElementById('final-inputs');
     const cartCount = document.getElementById('cart-count');
 
-    let cart = []; // Semua item terpilih di keranjang
-    let selectedMap = {}; // Simpan gantangan terpilih per kombinasi "jenis-kelas"
+    let cart = [];
+    let selectedMap = {};
 
     function toggleCart() {
         const cartPopup = document.getElementById('cart-popup');
@@ -132,10 +149,25 @@
                 pilihanGantangan.style.display = 'block';
                 data.gantangans.sort((a, b) => a.nomor - b.nomor);
 
-                for (let i = 0; i < data.gantangans.length; i += 8) {
+                const perRow = 4;
+                const total = data.gantangans.length;
+                const rows = Math.ceil(total / perRow);
+                let matrix = Array.from({ length: rows }, () => new Array(perRow).fill(null));
+
+                data.gantangans.forEach((item, index) => {
+                    const rowIdx = rows - 1 - Math.floor(index / perRow);
+                    const colIdx = index % perRow;
+                    if ((rows - 1 - rowIdx) % 2 === 0) {
+                        matrix[rowIdx][colIdx] = item;
+                    } else {
+                        matrix[rowIdx][perRow - 1 - colIdx] = item;
+                    }
+                });
+
+                matrix.forEach(rowItems => {
                     const row = document.createElement('div');
-                    const chunk = data.gantangans.slice(i, i + 8);
-                    chunk.forEach(item => {
+                    rowItems.forEach(item => {
+                        if (!item) return;
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.textContent = item.nomor;
@@ -157,10 +189,8 @@
                                 const index = selected.indexOf(item.id);
 
                                 if (index === -1) {
-                                    // Tambah ke cart dan map
                                     selected.push(item.id);
                                     selectedMap[key] = selected;
-
                                     cart.push({
                                         id: item.id,
                                         nomor: item.nomor,
@@ -169,13 +199,10 @@
                                         kelas_id: kelasId,
                                         kelas_nama: kelasSelect.options[kelasSelect.selectedIndex].text
                                     });
-
                                     btn.classList.replace('btn-info', 'btn-success');
                                 } else {
-                                    // Hapus dari cart dan map
                                     selected.splice(index, 1);
                                     selectedMap[key] = selected;
-
                                     cart = cart.filter(c => !(c.id === item.id && c.jenis_id === jenisId && c.kelas_id === kelasId));
                                     btn.classList.replace('btn-success', 'btn-info');
                                 }
@@ -187,35 +214,35 @@
                         row.appendChild(btn);
                     });
                     daftarGantangan.appendChild(row);
-                }
+                });
             });
     }
 
     function renderCart() {
-    cartItems.innerHTML = '';
-    finalInputs.innerHTML = '';
-    cartCount.textContent = cart.length;
+        cartItems.innerHTML = '';
+        finalInputs.innerHTML = '';
+        cartCount.textContent = cart.length;
 
-    cart.forEach((item, index) => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex justify-content-between align-items-center';
-        li.innerHTML = `
-            <div>
-                <strong>${item.nomor}</strong> - ${item.jenis_nama} (${item.kelas_nama})
-            </div>
-            <button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${index})">🗑️</button>
-        `;
-        cartItems.appendChild(li);
+        cart.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `
+                <div>
+                    <strong>${item.nomor}</strong> - ${item.jenis_nama} (${item.kelas_nama})
+                </div>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${index})">🗑️</button>
+            `;
+            cartItems.appendChild(li);
 
-        finalInputs.innerHTML += `
-            <input type="hidden" name="items[${index}][gantangan_id]" value="${item.id}">
-            <input type="hidden" name="items[${index}][jenis_id]" value="${item.jenis_id}">
-            <input type="hidden" name="items[${index}][kelas_id]" value="${item.kelas_id}">
-        `;
-    });
+            finalInputs.innerHTML += `
+                <input type="hidden" name="items[${index}][gantangan_id]" value="${item.id}">
+                <input type="hidden" name="items[${index}][jenis_id]" value="${item.jenis_id}">
+                <input type="hidden" name="items[${index}][kelas_id]" value="${item.kelas_id}">
+            `;
+        });
 
-    document.getElementById('cart-nama').value = document.getElementById('nama_input').value;
-}
+        document.getElementById('cart-nama').value = document.getElementById('nama_input').value;
+    }
 
     function removeFromCart(index) {
         const item = cart[index];
@@ -227,7 +254,7 @@
 
         cart.splice(index, 1);
         renderCart();
-        loadGantangan(); // reload untuk update tampilan tombol gantangan (warna)
+        loadGantangan();
     }
 </script>
-@endsection
+@endpush

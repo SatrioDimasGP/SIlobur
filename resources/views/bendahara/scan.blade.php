@@ -16,18 +16,27 @@
             <div class="p-5 profile-card bg-white border rounded-3">
                 <table id="qrcode_table" class="table table-bordered" style="width:100%">
                     <thead>
-                        <tr>
-                            <th class="text-center">Nama Peserta</th>
-                            <th class="text-center">Waktu Scan</th>
-                        </tr>
-                    </thead>
+    <tr>
+        <th class="text-center">Nama Peserta</th>
+        <th class="text-center">Jenis Burung</th>
+        <th class="text-center">Kelas</th>
+        <th class="text-center">Waktu Scan</th>
+    </tr>
+</thead>
+
                     <tbody>
-                        @foreach ($data as $key => $item)
-                            <tr>
-                                <td class="text-center">{{ $item->user->name }}</td>
-                                <td class="text-center">{{ $item->updated_at->format('d/m/Y, H.i.s') }}</td>
-                            </tr>
-                        @endforeach
+                       @foreach ($data as $key => $item)
+   @php
+    $burung = optional(optional($item->transaksi?->pemesanans)->burung);
+@endphp
+<tr>
+    <td class="text-center">{{ $item->user->name }}</td>
+    <td class="text-center">{{ $burung->jenisBurung->nama ?? '-' }}</td>
+    <td class="text-center">{{ $burung->kelas->nama ?? '-' }}</td>
+    <td class="text-center">{{ $item->updated_at->format('d/m/Y, H.i.s') }}</td>
+</tr>
+@endforeach
+
                     </tbody>
                 </table>
             </div>
@@ -141,9 +150,11 @@
                         const formattedDate = date.toLocaleString();
 
                         table.row.add([
-                            item.user.name,
-                            formattedDate
-                        ]).draw();
+    item.user.name,
+    item.transaksi?.pemesanan?.burung?.jenis_burung?.nama ?? '-',
+    item.transaksi?.pemesanan?.burung?.kelas?.nama ?? '-',
+    formattedDate
+]).draw();
                     });
 
                 } else {

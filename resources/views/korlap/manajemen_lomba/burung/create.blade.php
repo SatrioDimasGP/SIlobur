@@ -1,4 +1,9 @@
 @extends('layouts.app')
+@push('css')
+<link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+@endpush
 
 @section('content')
 <div class="container">
@@ -77,36 +82,81 @@
 
     {{-- Tabel Gabungan --}}
     <div class="card">
-        <div class="card-header">Daftar Gabungan Jenis Burung & Kelas</div>
-        <div class="card-body p-0">
-            <table class="table table-bordered mb-0">
-                <thead class="thead-light">
+    <div class="card-header">Daftar Gabungan Jenis Burung & Kelas</div>
+    <div class="card-body">
+        <table class="table table-bordered table-striped w-100" id="tabel-gabungan">
+            <thead class="thead-light">
+                <tr>
+                    <th>#</th>
+                    <th>Jenis Burung</th>
+                    <th>Kelas</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($burungGabungan as $bg)
                     <tr>
-                        <th>Jenis Burung</th>
-                        <th>Kelas</th>
-                        <th style="width: 150px;">Aksi</th>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $bg->jenisBurung->nama }}</td>
+                        <td>{{ $bg->kelas->nama }}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-info dropdown-toggle" data-toggle="dropdown">
+                                    <i class="fas fa-cog"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('manajemen-lomba.kelola.burung.edit', ['lomba_id' => $lomba->id, 'burung_id' => $bg->id]) }}">Edit</a>
+                                    </li>
+                                    <li>
+                                        <form action="{{ route('manajemen-lomba.kelola.burung.destroy', ['lomba_id' => $lomba->id, 'burung_id' => $bg->id]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus gabungan ini?')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="dropdown-item">Hapus</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse($burungGabungan as $bg)
-                        <tr>
-                            <td>{{ $bg->jenisBurung->nama }}</td>
-                            <td>{{ $bg->kelas->nama }}</td>
-                            <td>
-                                <a href="{{ route('manajemen-lomba.kelola.burung.edit', ['lomba_id' => $lomba->id, 'burung_id' => $bg->id]) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <form action="{{ route('manajemen-lomba.kelola.burung.destroy', ['lomba_id' => $lomba->id, 'burung_id' => $bg->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus gabungan ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-danger">Hapus</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="3" class="text-center">Belum ada gabungan.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                @empty
+                    <tr><td colspan="4" class="text-center">Belum ada gabungan.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
+</div>
 @endsection
+@push('js')
+<!-- DataTables -->
+<script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#tabel-gabungan').DataTable({
+            responsive: true,
+            autoWidth: false,
+            language: {
+                search: 'Cari:',
+                lengthMenu: 'Tampilkan _MENU_ entri',
+                zeroRecords: 'Tidak ada data ditemukan',
+                info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ entri',
+                infoEmpty: 'Tidak ada entri tersedia',
+                paginate: {
+                    first: 'Awal',
+                    last: 'Akhir',
+                    next: 'Berikutnya',
+                    previous: 'Sebelumnya'
+                }
+            },
+            dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                 "<'row'<'col-sm-12'tr>>" +
+                 "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+        });
+    });
+</script>
+@endpush

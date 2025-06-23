@@ -12,7 +12,7 @@ class Blok extends Model
 
     protected $table = 'bloks';
 
-    protected $fillable = ['nama', 'lomba_id', 'created_by', 'updated_by'];
+    protected $fillable = ['nama', 'lomba_id', 'burung_id', 'created_by', 'updated_by'];
 
     public $timestamps = true;
 
@@ -35,5 +35,10 @@ class Blok extends Model
     public function getBurungsAttribute()
     {
         return $this->lomba->kelas->flatMap->burungs->unique('id');
+    }
+
+    public function burung()
+    {
+        return $this->belongsTo(Burung::class);
     }
 }

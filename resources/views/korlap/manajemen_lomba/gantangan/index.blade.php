@@ -1,13 +1,22 @@
 @extends('layouts.app')
 
+@push('css')
+    <!-- DataTables -->
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+@endpush
+
+@section('title', 'Manajemen Gantangan')
+
 @section('content')
-<div class="container">
-    <h1 class="mb-4">Manajemen Gantangan</h1>
+<div class="container-fluid">
+    <h4 class="mb-4 text-uppercase">Manajemen Gantangan</h4>
 
     {{-- Tombol kembali --}}
     <div class="mb-3 d-flex justify-content-end">
         <a href="{{ route('manajemen-lomba.kelola', $lomba_id) }}" class="btn btn-tool">
-            <i class="fas fa-arrow-alt-circle-left"></i>
+            <i class="fas fa-arrow-alt-circle-left"></i> Kembali
         </a>
     </div>
 
@@ -25,54 +34,95 @@
         <div class="card-body">
             <form action="{{ route('manajemen-lomba.kelola.gantangan.store', $lomba_id) }}" method="POST">
                 @csrf
-                <div class="mb-3 row">
-                    <div class="col">
+                <div class="row">
+                    <div class="col-md-6">
                         <label for="nomor_awal" class="form-label">Nomor Awal</label>
                         <input type="number" name="nomor_awal" id="nomor_awal" class="form-control" required>
                     </div>
-                    <div class="col">
+                    <div class="col-md-6">
                         <label for="nomor_akhir" class="form-label">Nomor Akhir (Kosongkan untuk 1 nomor)</label>
                         <input type="number" name="nomor_akhir" id="nomor_akhir" class="form-control">
                     </div>
                 </div>
-
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="submit" class="btn btn-primary mt-3">Simpan</button>
             </form>
         </div>
     </div>
 
-    <!-- Tabel Daftar Gantangan -->
+    <!-- Tabel Gantangan -->
     <div class="card">
         <div class="card-header">Daftar Gantangan</div>
         <div class="card-body">
-            @if ($gantangans->isEmpty())
-                <p class="text-center">Belum ada data gantangan. Silakan tambahkan gantangan terlebih dahulu.</p>
-            @else
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Nomor Gantangan</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($gantangans as $gantangan)
-                            <tr>
-                                <td>{{ $gantangan->nomor }}</td>
-                                <td>
-                                    <a href="{{ route('manajemen-lomba.kelola.gantangan.edit', ['lomba_id' => $lomba_id, 'id' => $gantangan->id]) }}"class="btn btn-sm btn-warning">Edit</a>
-                                    <form action="{{ route('manajemen-lomba.kelola.gantangan.destroy', [$lomba_id, $gantangan->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus data ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @endif
+            <table id="datatable-main" class="table table-bordered table-striped text-sm">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nomor Gantangan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($gantangans as $index => $gantangan)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $gantangan->nomor }}</td>
+                        <td>
+    <div class="dropdown">
+        <button class="btn btn-sm btn-outline-info dropdown-toggle" data-toggle="dropdown">
+            <i class="fas fa-cog"></i>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a class="dropdown-item" href="{{ route('manajemen-lomba.kelola.gantangan.edit', ['lomba_id' => $lomba_id, 'id' => $gantangan->id]) }}">Edit</a>
+            </li>
+            <li>
+                <form action="{{ route('manajemen-lomba.kelola.gantangan.destroy', [$lomba_id, $gantangan->id]) }}" method="POST" onsubmit="return confirm('Hapus data ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="dropdown-item">Hapus</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+<script>
+    $(document).ready(function () {
+        $('#datatable-main').DataTable({
+            "pageLength": 10,
+            "responsive": true,
+            "autoWidth": false,
+            "ordering": true,
+            "lengthChange": true,
+            "searching": true,
+            "language": {
+                "search": "Cari:",
+                "lengthMenu": "Tampilkan _MENU_ data per halaman",
+                "zeroRecords": "Data tidak ditemukan",
+                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                "infoEmpty": "Tidak ada data",
+                "infoFiltered": "(difilter dari _MAX_ total data)"
+            },
+            "columnDefs": [
+                {
+                    targets: 1, // kolom Nomor Gantangan
+                    type: 'num', // pastikan sorting numerik
+                }
+            ]
+        });
+    });
+</script>
+@endpush

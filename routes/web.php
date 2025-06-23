@@ -83,7 +83,7 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-Route::middleware(['auth', 'role:admin|superadmin|'])->group(function () {
+Route::middleware(['auth', 'role:admin|superadmin|korlap|'])->group(function () {
 
     // Monitor Penilaian
     Route::get('/monitor-penilaian', [AdminController::class, 'monitorPenilaian'])->name('admin.monitor.index');
@@ -161,7 +161,7 @@ Route::middleware(['auth', 'role:juri'])->group(function () {
 //     Route::get('/riwayat-penilaian', [JuriController::class, 'riwayatIndex'])->name('penilaian-riwayat.index');
 // });
 
-Route::middleware(['auth', 'role:korlap|admin|superadmin'])->group(function () {
+Route::middleware(['auth', 'role:korlap|superadmin'])->group(function () {
 
     // Manajemen Lomba
     Route::get('/manajemen-lomba', [App\Http\Controllers\ManajemenLombaController::class, 'index'])->name('manajemen-lomba.index');

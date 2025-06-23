@@ -28,7 +28,7 @@
                         <h5 class="card-title m-0">Detail Penilaian</h5>
                         <div class="card-tools">
                             <a href="{{ route('penilaian-riwayat.index') }}" class="btn btn-tool">
-                                <i class="fas fa-arrow-alt-circle-left"></i> Kembali
+                                <i class="fas fa-arrow-alt-circle-left"></i>
                             </a>
                         </div>
                     </div>
@@ -68,9 +68,6 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                    <div class="card-footer">
-                        <a href="{{ route('penilaian-riwayat.index') }}" class="btn btn-secondary btn-block btn-flat">Kembali</a>
                     </div>
                 </div>
             </div>

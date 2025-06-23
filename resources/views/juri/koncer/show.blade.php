@@ -2,8 +2,15 @@
 
 @section('content')
     <div class="container">
-        <h1 class="mb-4">Penilaian Koncer - Lomba {{ $lomba->nama }}</h1>
+    <h1 class="mb-4">Penilaian Koncer - Lomba {{ optional($lomba)->nama ?? '-' }}</h1>
 
+    @if (is_null($lomba))
+        <div class="alert alert-danger text-center">
+            Juri belum ditugaskan di lomba ini.
+        </div>
+    @else
+        {{-- Sisa isi halaman hanya dirender jika juri memang ditugaskan --}}
+        
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -12,18 +19,7 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
-        {{-- @if (isset($menunggu) && $menunggu)
-            <div class="alert alert-warning text-center">
-                Semua juri belum menyelesaikan penilaian tahap Ajuan.
-            </div>
-        @endif --}}
-
-        {{-- @elseif(isset($nomorLolosKoncer) && count($nomorLolosKoncer) == 0)
-    <div class="alert alert-info text-center">
-        Tidak ada nomor yang lolos ke tahap Koncer.
-    </div> --}}
-        {{-- @endif --}}
-
+        {{-- Dropdown filter --}}
         <div class="mb-4">
             <label for="jenis_burung_id" class="form-label">Jenis Burung</label>
             <select id="jenis_burung_id" class="form-select">
@@ -45,12 +41,12 @@
             <!-- Form penilaian koncer akan muncul di sini -->
         </div>
 
+        {{-- Script hanya dijalankan jika juri ditugaskan --}}
         <script>
             const jenisSelect = document.getElementById('jenis_burung_id');
             const kelasSelect = document.getElementById('kelas_id');
             const blokList = document.getElementById('blok-list');
 
-            // Saat pilih jenis burung ➔ load kelas
             jenisSelect.addEventListener('change', () => {
                 const jenisId = jenisSelect.value;
                 kelasSelect.disabled = true;
@@ -73,7 +69,6 @@
                     .catch(() => alert('Gagal memuat data kelas'));
             });
 
-            // Saat pilih kelas ➔ load nomor lolos koncer dan tampilkan form
             kelasSelect.addEventListener('change', () => {
                 const kelasId = kelasSelect.value;
                 const jenisId = jenisSelect.value;
@@ -81,70 +76,67 @@
 
                 if (!kelasId || !jenisId) return;
 
-                fetch(
-                        `/ajax/nomor-lolos-koncer?jenis_burung_id=${jenisId}&kelas_id=${kelasId}&lomba_id={{ $lomba->id }}`)
+                fetch(`/ajax/nomor-lolos-koncer?jenis_burung_id=${jenisId}&kelas_id=${kelasId}&lomba_id={{ $lomba->id ?? 'null' }}`)
                     .then(r => r.json())
                     .then(data => {
                         blokList.innerHTML = '';
 
                         if (data.sudahMenilai) {
                             blokList.innerHTML = `
-                            <div class="alert alert-success text-center">
-                                Anda sudah melakukan penilaian pada tahap Koncer untuk jenis burung dan kelas ini.
-                            </div>`;
+                                <div class="alert alert-success text-center">
+                                    Anda sudah melakukan penilaian pada tahap Koncer untuk jenis burung dan kelas ini.
+                                </div>`;
                             return;
                         }
 
                         if (data.menunggu) {
                             blokList.innerHTML = `
-        <div class="alert alert-warning text-center">
-            Semua juri belum menyelesaikan penilaian tahap Ajuan untuk jenis burung dan kelas ini.
-        </div>`;
+                                <div class="alert alert-warning text-center">
+                                    Semua juri belum menyelesaikan penilaian tahap Ajuan untuk jenis burung dan kelas ini.
+                                </div>`;
                             return;
                         }
 
-                        // Buat form dengan hidden input jenis_burung_id dan kelas_id
                         let formHTML = `
-                        <form action="{{ route('penilaian-koncer.store', $lomba->id) }}" method="POST" id="formPenilaianKoncer">
-                            @csrf
-                            <input type="hidden" name="lomba_id" value="{{ $lomba->id }}">
-                            <input type="hidden" name="jenis_burung_id" id="jenis_burung_id_hidden" value="">
-                            <input type="hidden" name="kelas_id" id="kelas_id_hidden" value="">
-                            <div class="row">`;
+                            <form action="{{ route('penilaian-koncer.store', $lomba->id) }}" method="POST" id="formPenilaianKoncer">
+                                @csrf
+                                <input type="hidden" name="lomba_id" value="{{ $lomba->id }}">
+                                <input type="hidden" name="jenis_burung_id" id="jenis_burung_id_hidden" value="">
+                                <input type="hidden" name="kelas_id" id="kelas_id_hidden" value="">
+                                <div class="row">`;
 
                         data.nomorLolosKoncer.forEach((blok) => {
                             formHTML += `
-                            <div class="col-md-4 mb-4">
-                                <div class="card text-center shadow-sm">
-                                    <div class="card-body p-2">
-                                        <h5 class="card-title mb-3">Nomor: ${blok.gantangan.nomor}</h5>
-                                        <div class="d-flex justify-content-around">
-                                            <label>
-                                                <input type="checkbox" name="penilaian[${blok.id}][bendera][]" value="${blok.bendera_merah_id}"> Merah
-                                            </label>
-                                            <label>
-                                                <input type="checkbox" name="penilaian[${blok.id}][bendera][]" value="${blok.bendera_biru_id}"> Biru
-                                            </label>
-                                            <label>
-                                                <input type="checkbox" name="penilaian[${blok.id}][bendera][]" value="${blok.bendera_kuning_id}"> Kuning
-                                            </label>
+                                <div class="col-md-4 mb-4">
+                                    <div class="card text-center shadow-sm">
+                                        <div class="card-body p-2">
+                                            <h5 class="card-title mb-3">Nomor: ${blok.gantangan.nomor}</h5>
+                                            <div class="d-flex justify-content-around">
+                                                <label>
+                                                    <input type="checkbox" name="penilaian[${blok.id}][bendera][]" value="${blok.bendera_merah_id}"> Merah
+                                                </label>
+                                                <label>
+                                                    <input type="checkbox" name="penilaian[${blok.id}][bendera][]" value="${blok.bendera_biru_id}"> Biru
+                                                </label>
+                                                <label>
+                                                    <input type="checkbox" name="penilaian[${blok.id}][bendera][]" value="${blok.bendera_kuning_id}"> Kuning
+                                                </label>
+                                            </div>
+                                            <input type="hidden" name="penilaian[${blok.id}][gantanganId]" value="${blok.id}">
                                         </div>
-                                        <input type="hidden" name="penilaian[${blok.id}][gantanganId]" value="${blok.id}">
                                     </div>
-                                </div>
-                            </div>`;
+                                </div>`;
                         });
 
                         formHTML += `
-                            </div>
-                            <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-primary">Submit Penilaian</button>
-                            </div>
-                        </form>`;
+                                </div>
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-primary">Submit Penilaian</button>
+                                </div>
+                            </form>`;
 
                         blokList.innerHTML = formHTML;
 
-                        // Setelah form dibuat, tambahkan event listener submit untuk isi hidden input
                         const formPenilaian = document.getElementById('formPenilaianKoncer');
                         const jenisBurungHidden = document.getElementById('jenis_burung_id_hidden');
                         const kelasHidden = document.getElementById('kelas_id_hidden');
@@ -157,5 +149,7 @@
                     .catch(() => alert('Gagal memuat data nomor lolos koncer'));
             });
         </script>
-    </div>
+    @endif
+</div>
+
 @endsection

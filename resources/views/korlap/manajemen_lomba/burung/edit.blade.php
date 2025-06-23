@@ -7,7 +7,7 @@
     <div class="content-header px-2">
         <div class="row mb-2">
             <div class="col-sm-6 text-uppercase">
-                <h4 class="m-0">Edit Lomba</h4>
+                <h4 class="m-0">Edit Gabungan Jenis Burung & Kelas</h4>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">

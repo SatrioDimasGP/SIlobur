@@ -35,8 +35,8 @@
         </div>
     </div>
 
-    <div class="d-flex justify-content-between mt-3">
-        <a href="{{ route('data-pendaftaran.update-status', $pemesanan) }}" class="btn btn-primary">Perbarui Status Pembayaran</a>
-    </div>
+    <!--<div class="d-flex justify-content-between mt-3">-->
+    <!--    <a href="{{ route('data-pendaftaran.update-status', $pemesanan) }}" class="btn btn-primary">Perbarui Status Pembayaran</a>-->
+    <!--</div>-->
 </div>
 @endsection

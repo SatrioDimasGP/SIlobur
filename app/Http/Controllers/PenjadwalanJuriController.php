@@ -64,11 +64,10 @@ class PenjadwalanJuriController extends Controller
             }
 
             // Ambil semua blok dari lomba
-            $blokIds = DB::table('bloks')
-                ->where('lomba_id', $lombaId)
+            $blokIds = Blok::where('burung_id', $burungId)
                 ->whereNull('deleted_at')
+                ->get()
                 ->pluck('id');
-
             $sudahAda = [];
 
             foreach ($blokIds as $blokId) {

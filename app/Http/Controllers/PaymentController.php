@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Response;
-
+use Illuminate\Support\Facades\DB;
 // use PDF; // Tambahkan di atas controller
 
 
@@ -151,6 +151,7 @@ class PaymentController extends Controller
     public function callback(Request $request)
     {
         // \Log::info('Midtrans callback received', $request->all());
+        // \Log::info('Callback Midtrans Masuk', $request->all());
 
         $serverKey = config('midtrans.MIDTRANS_SERVER_KEY');
         $hashedKey = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
@@ -159,7 +160,7 @@ class PaymentController extends Controller
         //     'signature_key' => $request->signature_key,
         // ]);
 
-        if ($hashedKey == $request->signature_key) {
+        //if ($hashedKey == $request->signature_key) {
             if ($request->transaction_status == 'capture' || $request->transaction_status == 'settlement') {
                 $transaksi = Transaksi::where('order_id', $request->order_id)->first();
                 if (!$transaksi) {
@@ -215,9 +216,25 @@ class PaymentController extends Controller
 
                 return 2;
             }
+            if ($request->transaction_status == 'expire') {
+                $transaksi = Transaksi::where('order_id', $request->order_id)->first();
+                $transaksiLain = Transaksi::where('pemesanan_id', $transaksi->pemesanan_id)
+                    ->where('status_transaksi_id', 2)
+                    ->get();
 
-            return 1;
-        }
+                if ($transaksiLain->isEmpty()) {
+                    // Delete pemesanan
+                    $pemesanan = DB::table('pemesanans')
+                        ->where('id', $transaksi->pemesanan_id)
+                        ->delete();
+                    
+                    return "Data Pemesanan berhasil dihapus";
+                }
+                return 3;
+            }
+
+            //return 1;
+        //}
 
         return 0;
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blok;
+use App\Models\Burung;
 use App\Models\Gantangan;
 use App\Models\Lomba;
 use App\Models\BlokGantangan;
@@ -25,7 +26,7 @@ class KonfigurasiBlokController extends Controller
                 $query->whereHas('blok', fn($q) => $q->where('nama', 'like', "%$search%"))
                     ->orWhereHas('gantangan', fn($q) => $q->where('nomor', 'like', "%$search%"));
             })
-            ->paginate(10);
+            ->get();
 
         return view('korlap.konfigurasi_blok.index', compact('bloks', 'lombas', 'gantangans', 'blokGantangans'));
     }
@@ -35,6 +36,7 @@ class KonfigurasiBlokController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'lomba_id' => 'required|exists:lombas,id',
+            'burung_id' => 'required|exists:burungs,id'
         ]);
 
         DB::beginTransaction();
@@ -58,6 +60,7 @@ class KonfigurasiBlokController extends Controller
                 Blok::create([
                     'nama' => $request->nama,
                     'lomba_id' => $request->lomba_id,
+                    'burung_id' => $request->burung_id,
                     'created_by' => Auth::id(),
                     'updated_by' => Auth::id(),
                 ]);
@@ -138,34 +141,32 @@ class KonfigurasiBlokController extends Controller
     {
         $request->validate([
             'blok_id' => 'required|exists:bloks,id',
-            'gantangan_id' => 'required|exists:gantangans,id',
+            'gantangan_id' => 'required|array|min:1',
+            'gantangan_id.*' => 'required|exists:gantangans,id',
         ]);
 
         DB::beginTransaction();
         try {
-            $gantanganId = $request->gantangan_id;
+            foreach ($request->gantangan_id as $gantanganId) {
+                $existingGantangan = BlokGantangan::withTrashed()
+                    ->where('blok_id', $request->blok_id)
+                    ->where('gantangan_id', $gantanganId)
+                    ->first();
 
-            $existingGantangan = BlokGantangan::withTrashed()
-                ->where('blok_id', $request->blok_id)
-                ->where('gantangan_id', $gantanganId)
-                ->first();
-
-            if ($existingGantangan) {
-                if ($existingGantangan->trashed()) {
-                    // Jika pernah dihapus, maka restore dan update
-                    $existingGantangan->restore();
-                    $existingGantangan->update([
-                        'updated_by' => Auth::id(),
-                        'updated_at' => now(),
-                    ]);
-                } else {
-                    // Sudah ada dan aktif → return error
-                    return redirect()->back()
-                        ->withInput()
-                        ->with('error', 'Gantangan sudah terdaftar di blok ini.');
+                if ($existingGantangan) {
+                    if ($existingGantangan->trashed()) {
+                        // Jika pernah dihapus, maka restore dan update
+                        $existingGantangan->restore();
+                        $existingGantangan->update([
+                            'updated_by' => Auth::id(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                    // Jika sudah aktif, abaikan (tidak error)
+                    continue;
                 }
-            } else {
-                // Belum ada → buat baru
+
+                // Tambah baru
                 BlokGantangan::create([
                     'blok_id' => $request->blok_id,
                     'gantangan_id' => $gantanganId,
@@ -175,12 +176,14 @@ class KonfigurasiBlokController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('konfigurasi-blok.index')->with('success', 'Gantangan berhasil ditambahkan ke blok.');
+            return redirect()->route('konfigurasi-blok.index')
+                ->with('success', 'Beberapa gantangan berhasil ditambahkan ke blok.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal menambahkan gantangan: ' . $e->getMessage());
         }
     }
+
 
     public function editGantangan($id)
     {

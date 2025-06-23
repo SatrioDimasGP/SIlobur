@@ -9,8 +9,11 @@
             <h4 class="m-0">Detail Penilaian</h4>
         </div>
         <div class="col-sm-6 text-right">
-            <a href="{{ route('admin.monitor.index') }}" class="btn btn-secondary btn-sm">Kembali</a>
-        </div>
+                <a href="{{ route('admin.monitor.index') }}" class="btn btn-tool"><i class="fas fa-arrow-alt-circle-left"></i></a>
+            </div>
+        <!--<div class="col-sm-6 text-right">-->
+        <!--    <a href="{{ route('admin.monitor.index') }}" class="btn btn-secondary btn-sm">Kembali</a>-->
+        <!--</div>-->
     </div>
 
     <div class="card card-primary card-outline">

@@ -2,6 +2,12 @@
 
 @section('title', 'Kelola Lomba: ' . $lomba->nama)
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+@endpush
+
 @section('content')
 <div class="container">
     <h1 class="mb-4">Kelola Lomba: {{ $lomba->nama }}</h1>
@@ -70,36 +76,48 @@
             </div>
 
             {{-- Tabel Jenis Burung --}}
-            <div class="card">
-                <div class="card-header">Daftar Jenis Burung</div>
-                <div class="card-body p-0">
-                    <table class="table table-bordered mb-0">
-                        <thead>
-                            <tr>
-                                <th>Nama</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($jenisBurungs as $jenisBurung)
-                                <tr>
-                                    <td>{{ $jenisBurung->nama }}</td>
-                                    <td>
-                                        <a href="{{ route('manajemen-lomba.kelola.burung.jenis-burung.edit', ['lomba_id' => $lomba->id, 'id' => $jenisBurung->id]) }}" class="btn btn-sm btn-warning">Edit</a>
-                                        <form action="{{ route('manajemen-lomba.kelola.jenis-burung.destroy', ['lomba_id' => $lomba->id, 'id' => $jenisBurung->id]) }}" method="POST"
-                                            onsubmit="return confirm('Yakin ingin menghapus?')" style="display:inline;">
+           <div class="card">
+    <div class="card-header">Daftar Jenis Burung</div>
+    <div class="card-body">
+        <table class="table table-bordered table-striped w-100" id="tabel-jenis-burung">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nama</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($jenisBurungs as $jenisBurung)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $jenisBurung->nama }}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-info dropdown-toggle" data-toggle="dropdown">
+                                    <i class="fas fa-cog"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('manajemen-lomba.kelola.burung.jenis-burung.edit', ['lomba_id' => $lomba->id, 'id' => $jenisBurung->id]) }}">Edit</a>
+                                    </li>
+                                    <li>
+                                        <form action="{{ route('manajemen-lomba.kelola.jenis-burung.destroy', ['lomba_id' => $lomba->id, 'id' => $jenisBurung->id]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
                                             @csrf @method('DELETE')
-                                            <button class="btn btn-sm btn-danger">Hapus</button>
+                                            <button type="submit" class="dropdown-item">Hapus</button>
                                         </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="2" class="text-center">Belum ada jenis burung.</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="3" class="text-center">Belum ada jenis burung.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
         </div>
 
         {{-- Form Kelas --}}
@@ -125,37 +143,49 @@
 
             {{-- Tabel Kelas --}}
             <div class="card">
-                <div class="card-header">Daftar Kelas</div>
-                <div class="card-body p-0">
-                    <table class="table table-bordered mb-0">
-                       <thead>
-                            <tr>
-                                <th>Nama</th>
-                                <th>Harga</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($kelas as $item)
-                                <tr>
-                                    <td>{{ $item->nama }}</td>
-                                    <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
-                                    <td>
-                                        <a href="{{ route('manajemen-lomba.kelola.kelas.edit', ['lomba_id' => $lomba->id, 'id' => $item->id]) }}" class="btn btn-sm btn-warning">Edit</a>
-                                        <form action="{{ route('manajemen-lomba.kelola.kelas.destroy', ['lomba_id' => $lomba->id, 'id' => $item->id]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-sm btn-danger">Hapus</button>
+    <div class="card-header">Daftar Kelas</div>
+    <div class="card-body">
+        <table class="table table-bordered table-striped w-100" id="tabel-kelas">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nama</th>
+                    <th>Harga</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($kelas as $item)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $item->nama }}</td>
+                        <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-info dropdown-toggle" data-toggle="dropdown">
+                                    <i class="fas fa-cog"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('manajemen-lomba.kelola.kelas.edit', ['lomba_id' => $lomba->id, 'id' => $item->id]) }}">Edit</a>
+                                    </li>
+                                    <li>
+                                        <form action="{{ route('manajemen-lomba.kelola.kelas.destroy', ['lomba_id' => $lomba->id, 'id' => $item->id]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="dropdown-item">Hapus</button>
                                         </form>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr><td colspan="3" class="text-center">Belum ada kelas.</td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                </div>
-            </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="4" class="text-center">Belum ada kelas.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
         </div>
     </div>
 </div>
@@ -179,3 +209,37 @@
     });
 </script>
 @endsection
+@push('js')
+<!-- DataTables -->
+<script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#tabel-jenis-burung, #tabel-kelas').DataTable({
+            responsive: true,
+            autoWidth: false,
+            language: {
+                search: 'Cari:',
+                lengthMenu: 'Tampilkan _MENU_ entri',
+                zeroRecords: 'Tidak ada data ditemukan',
+                info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ entri',
+                infoEmpty: 'Tidak ada entri tersedia',
+                paginate: {
+                    first: 'Awal',
+                    last: 'Akhir',
+                    next: 'Berikutnya',
+                    previous: 'Sebelumnya'
+                }
+            },
+            dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                 "<'row'<'col-sm-12'tr>>" +
+                 "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+        });
+    });
+</script>
+@endpush
+

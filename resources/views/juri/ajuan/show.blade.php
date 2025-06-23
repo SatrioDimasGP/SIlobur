@@ -21,34 +21,40 @@
         <input type="hidden" name="lomba_id" value="{{ $lomba->id }}">
 
         <div class="row">
-            @foreach ($blok->gantangans as $index => $item)
+            @foreach ($blok->gantangans->sortBy('gantangan.nomor') as $index => $item)
                 <div class="col-md-4 mb-4">
                     <div class="card text-center shadow-sm">
                         <div class="card-body p-2">
                             <h5 class="card-title mb-3">Nomor: {{ $item->gantangan->nomor }}</h5>
 
-                            <div class="d-flex justify-content-around">
-                                <!-- Checkbox untuk memilih bendera -->
-                                <label>
-                                    <input type="checkbox" name="penilaian[{{ $item->id }}][bendera]" value="{{ $benderas->where('nama','putih')->first()->id }}" class="bendera-checkbox"> Putih
+                            @php
+                                $name = "penilaian[{$item->id}][bendera]";
+                                $benderaPutih = $benderas->where('nama','putih')->first();
+                                $benderaHijau = $benderas->where('nama','hijau')->first();
+                                $benderaHitam = $benderas->where('nama','hitam')->first();
+                            @endphp
+
+                           <div class="d-flex justify-content-around">
+                                <label class="badge bg-success">
+                                    <input type="radio" name="{{ $name }}" value="{{ $benderaHijau->id }}"> Hijau
                                 </label>
-                                <label>
-                                    <input type="checkbox" name="penilaian[{{ $item->id }}][bendera]" value="{{ $benderas->where('nama','hijau')->first()->id }}" class="bendera-checkbox"> Hijau
+                                <label class="badge" style="background-color: #ffffff; color: #000; border: 1px solid #ddd;">
+                                    <input type="radio" name="{{ $name }}" value="{{ $benderaPutih->id }}"> Putih
                                 </label>
-                                <label>
-                                    <input type="checkbox" name="penilaian[{{ $item->id }}][bendera]" value="{{ $benderas->where('nama','hitam')->first()->id }}" class="bendera-checkbox"> Hitam
+                                <label class="badge bg-dark text-white">
+                                    <input type="radio" name="{{ $name }}" value="{{ $benderaHitam->id }}"> Hitam
                                 </label>
                             </div>
 
-                            <!-- Input tersembunyi untuk menyimpan gantanganId -->
                             <input type="hidden" name="penilaian[{{ $item->id }}][gantanganId]" value="{{ $item->id }}">
                         </div>
                     </div>
                 </div>
 
                 @if(($index + 1) % 3 == 0)
-                    <div class="w-100"></div>
-                @endif
+    <div class="w-100"></div>
+@endif
+
             @endforeach
         </div>
 

@@ -18,7 +18,7 @@
     <link href="{{ asset('') }}assets/css/icons.css" rel="stylesheet">
                 <link rel="icon" href="{{ asset('') }}assets/images/login-images/logo-silobur.png" type="image/png" />
 
-    <title>{{ env('APP_NAME', 'PBL IK-TI') }}</title>
+    <title>{{ env('APP_NAME', 'Silobur') }}</title>
 </head>
 
 <body class="">
@@ -48,7 +48,7 @@
                                         {{-- <img src="assets/images/logo-icon.png" width="60" alt=""> --}}
                                     </div>
                                     <div class="text-center mb-4">
-                                        <h3 class="">{{ env('APP_NAME', 'PBL IK-TI') }}</h3>
+                                        <h3 class="">{{ env('APP_NAME', 'Silobur') }}</h3>
                                         <p class="mb-0"></p>
                                     </div>
                                     <div class="form-body">

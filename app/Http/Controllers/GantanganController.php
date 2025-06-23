@@ -17,7 +17,7 @@ class GantanganController extends Controller
     // Menampilkan daftar gantangan
     public function index($lomba_id)
     {
-        $gantangans = Gantangan::orderBy('nomor')->get();
+        $gantangans = Gantangan::orderByRaw('CAST(nomor AS UNSIGNED) ASC')->get();
 
         return view('korlap.manajemen_lomba.gantangan.index', compact('gantangans', 'lomba_id'));
     }
@@ -82,37 +82,55 @@ class GantanganController extends Controller
 
     // Memperbarui data gantangan
     public function update(Request $request, $lomba_id, $id)
-    {
-        $request->validate([
-            'nomor' => 'required|numeric',
+{
+    $request->validate([
+        'nomor' => 'required|numeric',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        $nomor = $request->nomor;
+        $gantanganLama = Gantangan::findOrFail($id);
+
+        $existing = Gantangan::withTrashed()
+            ->where('nomor', $nomor)
+            ->where('id', '!=', $id)
+            ->first();
+
+        if ($existing) {
+            if ($existing->trashed()) {
+                // Restore dan update `updated_by`
+                $existing->restore();
+                $existing->update([
+                    'updated_by' => Auth::id(),
+                ]);
+                // Hapus data lama yang sedang diedit
+                $gantanganLama->delete();
+
+                DB::commit();
+                return redirect()->route('manajemen-lomba.kelola.gantangan.index', $lomba_id)
+                    ->with('success', "Nomor gantangan {$nomor} telah dipulihkan dan diperbarui.");
+            } else {
+                throw new \Exception("Nomor gantangan {$nomor} sudah digunakan.");
+            }
+        }
+
+        // Jika tidak ada konflik, lanjut update biasa
+        $gantanganLama->update([
+            'nomor' => $nomor,
+            'updated_by' => Auth::id(),
         ]);
 
-        DB::beginTransaction();
-
-        try {
-            $gantangan = Gantangan::findOrFail($id);
-
-            // Cek apakah nomor gantangan sudah dipakai nomor lain
-            $exists = Gantangan::where('nomor', $request->nomor)
-                ->where('id', '!=', $id)
-                ->exists();
-
-            if ($exists) {
-                throw new \Exception("Nomor gantangan {$request->nomor} sudah digunakan.");
-            }
-
-            $gantangan->update([
-                'nomor' => $request->nomor,
-                'updated_by' => Auth::id(),
-            ]);
-
-            DB::commit();
-            return redirect()->route('manajemen-lomba.kelola.gantangan.index', $lomba_id ?? null)->with('success', 'Gantangan berhasil diperbarui.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', $e->getMessage())->withInput();
-        }
+        DB::commit();
+        return redirect()->route('manajemen-lomba.kelola.gantangan.index', $lomba_id)
+            ->with('success', 'Gantangan berhasil diperbarui.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', $e->getMessage())->withInput();
     }
+}
+
 
 
     // Menghapus data gantangan
