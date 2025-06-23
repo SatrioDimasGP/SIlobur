@@ -117,7 +117,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Nama</th>
-                                    <th>Lomba</th>
+                                    {{-- <th>Lomba</th> --}}
                                     <th>Burung</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -127,7 +127,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $blok->nama }}</td>
-                                        <td>{{ $blok->lomba->nama ?? '-' }}</td>
+                                        {{-- <td>{{ $blok->lomba->nama ?? '-' }}</td> --}}
                                         <td>{{ $blok->burung->jenisBurung->nama ?? '-' }} -
                                             {{ $blok->burung->kelas->nama ?? '-' }}</td>
                                         <td>
@@ -176,7 +176,7 @@
                                     <option value="">-- Pilih Blok --</option>
                                     @foreach ($bloks as $blok)
                                         <option value="{{ $blok->id }}">{{ $blok->nama }} -
-                                            {{ $blok->lomba->nama ?? '-' }} -
+                                            {{-- {{ $blok->lomba->nama ?? '-' }} - --}}
                                             {{ $blok->burung->jenisBurung->nama ?? '?' }} - {{ $blok->burung->kelas->nama ?? '?' }}
                                         </option>
                                     @endforeach
