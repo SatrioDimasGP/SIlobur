@@ -190,6 +190,15 @@ class JuriController extends Controller
             return $item->gantangan->nomor;
         })->values(); // reset key agar foreach tidak aneh
 
+        $hitamId = $benderas->where('nama', 'hitam')->first()?->id ?? null;
+        $blokGantanganIds = $blok->gantangans->pluck('id')->toArray();
+        $blokGantanganTerblokir = Penilaian::whereIn('blok_gantangan_id', $blokGantanganIds)
+            ->where('lomba_id', $lombaAktif->id)
+            ->where('bendera_id', $hitamId)
+            ->where('user_id', '!=', $userId)
+            ->pluck('blok_gantangan_id')
+            ->toArray();
+
         return view('juri.ajuan.show', [
             'blok' => $blok,
             'lomba' => $lombaAktif,
@@ -197,6 +206,7 @@ class JuriController extends Controller
             'lombaId' => $lombaAktif->id,
             'blokId' => $blok->id,
             'gantangans' => $blok->gantangans->pluck('gantangan')->flatten(), // tidak wajib sebenarnya
+            'blokGantanganTerblokir' => $blokGantanganTerblokir, // 👈 kirim ke view
         ]);
     }
     // Menampilkan nomor gantangan dalam blok tertentu untuk tahap ajuan
@@ -290,7 +300,6 @@ class JuriController extends Controller
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-
 
     public function koncerIndex()
     {
@@ -433,6 +442,7 @@ class JuriController extends Controller
         Log::info('Memulai proses mendapatkan nomor lolos koncer', compact('lombaId', 'jenisBurungId', 'kelasId', 'juriId'));
 
         if (!$lombaId || !$jenisBurungId || !$kelasId) {
+            Log::error('Input tidak lengkap');
             return response()->json([
                 'status' => 'error',
                 'message' => 'Parameter lomba_id, jenis_burung_id, dan kelas_id wajib diisi',
@@ -441,36 +451,68 @@ class JuriController extends Controller
 
         $tahapAjuanId = Tahap::where('nama', 'Ajuan')->value('id');
         $tahapKoncerId = Tahap::where('nama', 'Koncer')->value('id');
-
         $benderaHijauId = Bendera::where('nama', 'Hijau')->value('id');
         $benderaMerahId = Bendera::where('nama', 'Merah')->value('id');
         $benderaBiruId = Bendera::where('nama', 'Biru')->value('id');
         $benderaKuningId = Bendera::where('nama', 'Kuning')->value('id');
+        $benderaPutihId = Bendera::where('nama', 'Putih')->value('id');
 
-        // Ambil daftar burung
+        // Hitung kebutuhan penilaian tahap Ajuan
+        // $jumlahJuri = JuriTugas::where('lomba_id', $lombaId)->distinct('user_id')->count('user_id');
+        $jumlahJuri = JuriTugas::where('lomba_id', $lombaId)
+            ->whereHas('blok.burung', function ($q) use ($jenisBurungId, $kelasId) {
+                $q->where('jenis_burung_id', $jenisBurungId)
+                    ->where('kelas_id', $kelasId);
+            })
+            ->distinct('user_id')
+            ->count('user_id');
+
         $burungIds = Burung::where('jenis_burung_id', $jenisBurungId)
             ->where('kelas_id', $kelasId)
             ->pluck('id');
 
-        // Ambil blok yang relevan
         $blokIds = Blok::where('lomba_id', $lombaId)
             ->whereIn('burung_id', $burungIds)
             ->pluck('id');
 
-        // Ambil blok gantangan yang relevan
-        $blokGantanganIds = BlokGantangan::whereIn('blok_id', $blokIds)->pluck('id');
+        $blokGantanganIds = BlokGantangan::whereIn('blok_id', $blokIds)
+            ->pluck('id');
 
-        // Hitung kebutuhan penilaian Ajuan
-        $jumlahJuri = JuriTugas::where('lomba_id', $lombaId)->distinct('user_id')->count('user_id');
+        // $blokIds = Blok::where('lomba_id', $lombaId)
+        //     ->whereHas('lomba.kelas.burungs', function ($q) use ($jenisBurungId, $kelasId) {
+        //         $q->where('jenis_burung_id', $jenisBurungId)
+        //             ->where('kelas_id', $kelasId);
+        //     })
+        //     ->pluck('id');
+
+        // $blokGantanganIds = BlokGantangan::whereIn('blok_id', $blokIds)
+        //     ->whereHas('blok.lomba.kelas.burungs', function ($q) use ($jenisBurungId, $kelasId) {
+        //         $q->where('jenis_burung_id', $jenisBurungId)
+        //             ->where('kelas_id', $kelasId);
+        //     })
+        //     ->pluck(column: 'id');
+
+        Log::debug('Jumlah juri dan blok gantangan terkait', [
+            'jumlah_juri' => $jumlahJuri,
+            'blok_gantangan_ids' => $blokGantanganIds->toArray(),
+        ]);
+
         $totalSeharusnya = $jumlahJuri * $blokGantanganIds->count();
 
         $terisi = Penilaian::where('lomba_id', $lombaId)
             ->where('tahap_id', $tahapAjuanId)
             ->whereIn('blok_gantangan_id', $blokGantanganIds)
-            ->whereIn('burung_id', $burungIds)
+            ->whereHas('burung', function ($q) use ($jenisBurungId, $kelasId) {
+                $q->where('jenis_burung_id', $jenisBurungId)
+                    ->where('kelas_id', $kelasId);
+            })
             ->count();
 
+        Log::debug('blokGantanganIds', $blokGantanganIds->toArray());
+        Log::debug('Penilaian Ajuan terisi', ['terisi' => $terisi, 'dibutuhkan' => $totalSeharusnya]);
+
         if ($terisi < $totalSeharusnya) {
+            Log::warning('Penilaian Ajuan belum lengkap', ['total_dibutuhkan' => $totalSeharusnya, 'terisi' => $terisi]);
             return response()->json([
                 'status' => 'success',
                 'menunggu' => true,
@@ -480,48 +522,90 @@ class JuriController extends Controller
             ]);
         }
 
-        // Hitung bendera hijau per nomor
-        $jumlahHijauPerNomor = Penilaian::select('blok_gantangan_id', DB::raw('count(*) as total_hijau'))
-            ->where('lomba_id', $lombaId)
+        // Hitung jumlah bendera hijau per nomor
+        // Ambil semua penilaian tahap Ajuan untuk bendera Hijau dan Putih
+        $rekapPenilaian = Penilaian::select(
+            'blok_gantangan_id',
+            DB::raw("SUM(CASE WHEN bendera_id = {$benderaHijauId} THEN 1 ELSE 0 END) as total_hijau"),
+            DB::raw("SUM(CASE WHEN bendera_id = {$benderaPutihId} THEN 1 ELSE 0 END) as total_putih")
+        )
             ->where('tahap_id', $tahapAjuanId)
-            ->where('bendera_id', $benderaHijauId)
+            ->where('lomba_id', $lombaId)
             ->whereIn('blok_gantangan_id', $blokGantanganIds)
-            ->whereIn('burung_id', $burungIds)
+            ->whereHas('burung', function ($query) use ($jenisBurungId, $kelasId) {
+                $query->where('jenis_burung_id', $jenisBurungId)
+                    ->where('kelas_id', $kelasId);
+            })
             ->groupBy('blok_gantangan_id')
-            ->get();
+            ->get()
+            ->sortBy([
+                ['total_hijau', 'desc'],
+                ['total_putih', 'asc'], // putih sebagai penentu tie-break
+            ])
+            ->values();
+        Log::debug('Hasil rekapPenilaian:', $rekapPenilaian->toArray());
 
-        if ($jumlahHijauPerNomor->isEmpty()) {
-            return response()->json([
-                'status' => 'success',
-                'menunggu' => false,
-                'sudahMenilai' => false,
-                'nomorLangsungJuara1' => null,
-                'nomorLolosKoncer' => [],
-            ]);
-        }
 
-        $maxHijau = $jumlahHijauPerNomor->max('total_hijau');
-        $blokGantanganMaxHijau = $jumlahHijauPerNomor->where('total_hijau', $maxHijau);
+        $maxHijau = $rekapPenilaian->first()->total_hijau; // karena sudah diurutkan
+        $blokGantanganMaxHijau = $rekapPenilaian->filter(fn($item) => $item->total_hijau == $maxHijau);
 
         $blokGantanganLangsungJuara1 = null;
-        $blokGantanganIdsKoncer = [];
+        $calonKoncer = $rekapPenilaian->filter(
+            fn($item) => $item->total_hijau == ($maxHijau - 1)
+        );
+
+        $minPutih = $calonKoncer->min('total_putih');
+
+        $blokGantanganIdsKoncer = $calonKoncer
+            ->filter(fn($item) => $item->total_putih == $minPutih)
+            ->pluck('blok_gantangan_id')
+            ->toArray();
+
 
         if ($blokGantanganMaxHijau->count() === 1) {
+            // Langsung Juara 1
             $blokGantanganLangsungJuara1 = $blokGantanganMaxHijau->first()->blok_gantangan_id;
-            $blokGantanganIdsKoncer = $jumlahHijauPerNomor->where('total_hijau', $maxHijau - 1)->pluck('blok_gantangan_id')->toArray();
-        } else {
-            $blokGantanganIdsKoncer = $blokGantanganMaxHijau->pluck('blok_gantangan_id')->toArray();
+
+            // Ambil yang satu tingkat di bawah (total_hijau = max - 1)
+            $calonKoncer = $rekapPenilaian->filter(
+                fn($item) => $item->total_hijau == ($maxHijau - 1)
+            );
+
+            if ($calonKoncer->isNotEmpty()) {
+                $minPutih = $calonKoncer->min('total_putih');
+
+                $blokGantanganIdsKoncer = $calonKoncer->filter(
+                    fn($item) => $item->total_putih == $minPutih
+                )->pluck('blok_gantangan_id')->toArray();
+            } else {
+                $blokGantanganIdsKoncer = [];
+            }
         }
 
-        $dataNomor = BlokGantangan::with('gantangan')
+        $dataNomor = BlokGantangan::with(['blok.lomba.kelas.burungs.jenisBurung', 'gantangan'])
             ->whereIn('id', $blokGantanganIdsKoncer)
+            ->whereHas('blok.lomba', fn($q) => $q->where('id', $lombaId))
+            ->whereHas('blok.lomba.kelas', fn($q) => $q->where('id', $kelasId))
+            ->whereHas('blok.lomba.kelas.burungs.jenisBurung', fn($q) => $q->where('id', $jenisBurungId))
             ->get()
-            ->map(function ($item) use ($juriId, $lombaId, $tahapKoncerId, $burungIds, $benderaMerahId, $benderaBiruId, $benderaKuningId) {
+            ->map(function ($item) use (
+                $juriId,
+                $lombaId,
+                $tahapKoncerId,
+                $benderaMerahId,
+                $benderaBiruId,
+                $benderaKuningId,
+                $jenisBurungId,
+                $kelasId
+            ) {
                 $sudahDinilai = Penilaian::where('user_id', $juriId)
                     ->where('lomba_id', $lombaId)
                     ->where('tahap_id', $tahapKoncerId)
                     ->where('blok_gantangan_id', $item->id)
-                    ->whereIn('burung_id', $burungIds)
+                    ->whereHas('burung', function ($query) use ($jenisBurungId, $kelasId) {
+                        $query->where('jenis_burung_id', $jenisBurungId)
+                            ->where('kelas_id', $kelasId);
+                    })
                     ->exists();
 
                 return [
@@ -537,11 +621,20 @@ class JuriController extends Controller
             });
 
         $sudahMenilai = $dataNomor->every(fn($item) => $item['sudah_dinilai']);
+
+        // Urutkan berdasarkan nomor gantangan
         $dataNomor = $dataNomor->sortBy(fn($item) => (int) $item['gantangan']['nomor'])->values();
+
 
         $nomorLangsungJuara1 = null;
         if ($blokGantanganLangsungJuara1) {
-            $item = BlokGantangan::with('gantangan')->find($blokGantanganLangsungJuara1);
+            $item = BlokGantangan::with(['blok.lomba.kelas.burungs.jenisBurung', 'gantangan'])
+                ->where('id', $blokGantanganLangsungJuara1)
+                ->whereHas('blok.lomba', fn($q) => $q->where('id', $lombaId))
+                ->whereHas('blok.lomba.kelas', fn($q) => $q->where('id', $kelasId))
+                ->whereHas('blok.lomba.kelas.burungs.jenisBurung', fn($q) => $q->where('id', $jenisBurungId))
+                ->first();
+
             if ($item) {
                 $nomorLangsungJuara1 = [
                     'id' => $item->id,
@@ -560,8 +653,6 @@ class JuriController extends Controller
             'nomorLolosKoncer' => $dataNomor,
         ]);
     }
-
-
 
     public function storeKoncer(Request $request, $lombaId)
     {

@@ -79,14 +79,20 @@ class KonfigurasiBlokController extends Controller
     {
         $blok = Blok::findOrFail($id);
         $lombas = Lomba::all();
-        return view('korlap.konfigurasi_blok.edit_blok', compact('blok', 'lombas'));
+
+        // Ambil daftar jenis burung & kelas yang tersedia
+        $jenisBurungKelas = Burung::with(['jenisBurung', 'kelas'])->get(); // Pastikan relasi 'jenisBurung' dan 'kelas' ada
+
+        return view('korlap.konfigurasi_blok.edit_blok', compact('blok', 'lombas', 'jenisBurungKelas'));
     }
+
 
     public function update(Request $request, $id)
     {
         $request->validate([
             'nama' => 'required|string|max:50',
             'lomba_id' => 'required|exists:lombas,id',
+            'burung_id' => 'required|exists:burungs,id', // tambahkan validasi burung_id
         ]);
 
         DB::beginTransaction();
@@ -96,6 +102,7 @@ class KonfigurasiBlokController extends Controller
             $duplicate = Blok::withTrashed()
                 ->where('nama', $request->nama)
                 ->where('lomba_id', $request->lomba_id)
+                ->where('burung_id', $request->burung_id)
                 ->where('id', '!=', $id)
                 ->first();
 
@@ -104,13 +111,14 @@ class KonfigurasiBlokController extends Controller
                     $duplicate->forceDelete();
                 } else {
                     return redirect()->route('konfigurasi-blok.index')
-                        ->with('error', 'Blok dengan nama dan lomba ini sudah ada.');
+                        ->with('error', 'Blok dengan nama dan kombinasi ini sudah ada.');
                 }
             }
 
             $blok->update([
                 'nama' => $request->nama,
                 'lomba_id' => $request->lomba_id,
+                'burung_id' => $request->burung_id, // update burung_id
                 'updated_by' => Auth::id(),
                 'deleted_at' => null,
             ]);
@@ -122,6 +130,7 @@ class KonfigurasiBlokController extends Controller
             return redirect()->back()->with('error', 'Gagal memperbarui blok: ' . $e->getMessage());
         }
     }
+
 
     public function destroy($id)
     {

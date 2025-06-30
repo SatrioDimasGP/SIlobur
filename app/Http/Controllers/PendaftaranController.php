@@ -56,15 +56,19 @@ class PendaftaranController extends Controller
 
         // Ambil semua nomor gantangan yang terkait lomba ini lewat blok → blok_gantangan → gantangan
         $gantangans = Gantangan::whereNull('deleted_at')
-            ->whereIn('id', function ($query) use ($lomba_id) {
+            ->whereIn('id', function ($query) use ($lomba_id, $jenis_burung_id, $kelas_id) {
                 $query->select('gantangan_id')
                     ->from('blok_gantangans')
                     ->whereNull('deleted_at')
-                    ->whereIn('blok_id', function ($subQuery) use ($lomba_id) {
-                        $subQuery->select('id')
+                    ->whereIn('blok_id', function ($subQuery) use ($lomba_id, $jenis_burung_id, $kelas_id) {
+                        $subQuery->select('bloks.id')
                             ->from('bloks')
-                            ->where('lomba_id', $lomba_id)
-                            ->whereNull('deleted_at');
+                            ->join('burungs', 'bloks.burung_id', '=', 'burungs.id')
+                            ->where('bloks.lomba_id', $lomba_id)
+                            ->where('burungs.jenis_burung_id', $jenis_burung_id)
+                            ->where('burungs.kelas_id', $kelas_id)
+                            ->whereNull('bloks.deleted_at')
+                            ->whereNull('burungs.deleted_at');
                     });
             })
             ->get()

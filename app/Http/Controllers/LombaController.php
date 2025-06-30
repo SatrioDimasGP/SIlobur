@@ -179,12 +179,19 @@ class LombaController extends Controller
                     if ($koncerData->isNotEmpty()) {
                         $rank = 2;
                         $prevPoint = null;
-                        foreach ($koncerData->sortByDesc('total')->values() as $item) {
-                            if ($prevPoint !== null && $item->total < $prevPoint) {
+                        $kelompokPoin = $koncerData->groupBy('total')->sortKeysDesc();
+
+                        foreach ($kelompokPoin as $poin => $items) {
+                            if ($items->count() > 1) {
+                                foreach ($items as $item) {
+                                    $item->status_juara = 'Toss';
+                                }
+                                $rank += $items->count(); // lewati rank sebanyak peserta toss
+                            } else {
+                                $item = $items->first();
+                                $item->status_juara = 'Juara ' . $rank;
                                 $rank++;
                             }
-                            $item->status_juara = 'Juara ' . $rank;
-                            $prevPoint = $item->total;
                         }
                     }
                 }

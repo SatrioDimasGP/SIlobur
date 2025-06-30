@@ -151,20 +151,21 @@ class AdminController extends Controller
             $prevPoin = null;
             $prevRank = $rank;
 
-            foreach ($hasilKoncer as $item) {
-                if ($prevPoin === null) {
-                    $item->status = 'Juara ' . $rank;
-                    $prevRank = $rank;
-                } elseif ($item->total_poin == $prevPoin) {
-                    $item->status = 'Juara ' . $prevRank; // juara bersama
-                } else {
-                    $rank++;
-                    $item->status = 'Juara ' . $rank;
-                    $prevRank = $rank;
-                }
+            $kelompokPoin = $hasilKoncer->groupBy('total_poin');
 
-                $prevPoin = $item->total_poin;
-                $hasilGabungan->push($item);
+            foreach ($kelompokPoin as $poin => $items) {
+                if ($items->count() > 1) {
+                    foreach ($items as $item) {
+                        $item->status = 'Toss';
+                        $hasilGabungan->push($item);
+                    }
+                    $rank += $items->count(); // skip peringkat karena toss
+                } else {
+                    $item = $items->first();
+                    $item->status = 'Juara ' . $rank;
+                    $hasilGabungan->push($item);
+                    $rank++;
+                }
             }
         }
 
