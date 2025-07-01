@@ -16,9 +16,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link href="{{ asset('') }}assets/css/app.css" rel="stylesheet">
     <link href="{{ asset('') }}assets/css/icons.css" rel="stylesheet">
-                <link rel="icon" href="{{ asset('') }}assets/images/login-images/logo-silobur.png" type="image/png" />
+    <link rel="icon" href="{{ asset('') }}assets/images/login-images/logo-silobur.png" type="image/png" />
 
     <title>{{ env('APP_NAME', 'Silobur') }}</title>
+    <style>
+        .btn-google {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #fff;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 12px;
+            margin: 18px 0 12px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+            }
+
+        .btn-google:hover {
+            background: #f7f7f7;
+            border-color: #299e63;
+        }
+    </style>
 </head>
 
 <body class="">
@@ -58,7 +82,8 @@
                                                 <label for="inputEmailAddress" class="form-label">Alamat Email</label>
                                                 <input type="email" name="email"
                                                     class="form-control @error('email') is-invalid @enderror"
-                                                    id="inputEmailAddress" placeholder="Alamat Email" value="{{ old('email') }}">
+                                                    id="inputEmailAddress" placeholder="Alamat Email"
+                                                    value="{{ old('email') }}">
                                                 @error('email')
                                                     <span class="invalid-feedback" role="alert">
                                                         <strong>{{ $message }}</strong>
@@ -95,9 +120,17 @@
                                             </div>
                                             <div class="col-12">
                                                 <div class="d-grid">
-                                                    <button type="submit" class="btn btn-primary btn-sm" style="background-color:#846C3">Masuk</button>
+                                                    <button type="submit" class="btn btn-primary btn-sm"
+                                                        style="background-color:#846C3">Masuk</button>
                                                 </div>
                                             </div>
+                                            <button type="button" class="btn-google"
+                                                onclick="window.location.href='/auth/google'">
+                                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                                                    alt="Google"
+                                                    style="width:20px;vertical-align:middle;margin-right:8px;">
+                                                Login dengan Google
+                                            </button>
                                             <div class="col-12">
                                                 <div class="text-center ">
                                                     <p class="mb-0">Belum memuliki akun ? <a
