@@ -66,8 +66,9 @@ class LoginController extends Controller
             }
 
             Auth::login($user, true);
+            return redirect($this->redirectTo); // ✅ benar
 
-            return redirect($this->redirectTo());
+            // return redirect($this->redirectTo());
         } catch (\Exception $e) {
             return redirect('/login')->with('error', 'Gagal login dengan Google: ' . $e->getMessage());
         }
