@@ -79,5 +79,22 @@
                 <button type="submit" class="btn btn-primary">Submit Penilaian</button>
             </div>
         </form>
+        <script>
+            // Aktifkan fitur klik ulang untuk uncheck radio di form Ajuan
+            document.querySelectorAll('#formPenilaian input[type="radio"]').forEach(radio => {
+                radio.addEventListener('mousedown', function() {
+                    // Simpan apakah sudah ter-check sebelum klik
+                    this.wasChecked = this.checked;
+                });
+
+                radio.addEventListener('click', function() {
+                    // Jika sebelumnya sudah ter-check, maka hilangkan
+                    if (this.wasChecked) {
+                        this.checked = false;
+                        this.dispatchEvent(new Event('change'));
+                    }
+                });
+            });
+        </script>
     </div>
 @endsection
