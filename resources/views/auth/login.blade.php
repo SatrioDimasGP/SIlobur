@@ -124,6 +124,9 @@
                                                         style="background-color:#846C3">Masuk</button>
                                                 </div>
                                             </div>
+                                            <div class="col-12 text-center">
+                                                atau
+                                                </div>
                                             <button type="button" class="btn-google"
                                                 onclick="window.location.href='/auth/google'">
                                                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
