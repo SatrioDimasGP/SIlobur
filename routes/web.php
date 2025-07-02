@@ -96,6 +96,11 @@ Route::middleware(['auth', 'role:admin|superadmin|korlap|'])->group(function () 
     // Hasil Lomba
     Route::get('/hasil-lomba', [AdminController::class, 'hasilLomba'])->name('admin.hasil.index');
     Route::get('/hasil-lomba/{nomor}', [AdminController::class, 'hasilShow'])->name('admin.hasil_lomba.show');
+
+    // Pantau Lomba Realtime
+    Route::get('/pantau-lomba', [AdminController::class, 'pantauLomba'])->name('admin.pantau_lomba');
+    Route::get('/admin/pantau-lomba/data', [AdminController::class, 'pantauLombaData'])->name('admin.pantau_lomba.data');
+
 });
 
 

@@ -663,8 +663,7 @@ class JuriController extends Controller
             'kelas_id' => 'required|exists:kelas,id',
             'penilaian' => 'required|array',
             'penilaian.*.gantanganId' => 'required|exists:blok_gantangans,id',
-            'penilaian.*.bendera' => 'nullable|array',
-            'penilaian.*.bendera.*' => 'exists:benderas,id',
+            'penilaian.*.bendera' => 'nullable|exists:benderas,id',
         ]);
 
         $burung = Burung::where('jenis_burung_id', $validated['jenis_burung_id'])
@@ -680,25 +679,24 @@ class JuriController extends Controller
         if (!$tahapKoncer) {
             return redirect()->back()->with('error', 'Tahap Koncer tidak ditemukan.');
         }
+        // dd($request->all());
 
         DB::beginTransaction();
         try {
             foreach ($validated['penilaian'] as $penilaian) {
                 $blokGantanganId = $penilaian['gantanganId'];
-                $benderaIds = $penilaian['bendera'] ?? [];
+                $benderaId = $penilaian['bendera'] ?? null;
 
-                if (count($benderaIds) > 0) {
-                    foreach ($benderaIds as $benderaId) {
-                        Penilaian::create([
-                            'lomba_id' => $lombaId,
-                            'blok_gantangan_id' => $blokGantanganId,
-                            'user_id' => $user->id,
-                            'tahap_id' => $tahapKoncer->id,
-                            'bendera_id' => $benderaId,
-                            'status_penilaian_id' => 2, // Sudah Dinilai
-                            'burung_id' => $burung->id,
-                        ]);
-                    }
+                if ($benderaId) {
+                    Penilaian::create([
+                        'lomba_id' => $lombaId,
+                        'blok_gantangan_id' => $blokGantanganId,
+                        'user_id' => $user->id,
+                        'tahap_id' => $tahapKoncer->id,
+                        'bendera_id' => $benderaId,
+                        'status_penilaian_id' => 2, // Sudah Dinilai
+                        'burung_id' => $burung->id,
+                    ]);
                 } else {
                     Penilaian::create([
                         'lomba_id' => $lombaId,
@@ -711,7 +709,6 @@ class JuriController extends Controller
                     ]);
                 }
             }
-
             DB::commit();
             return redirect()->back()->with('success', 'Penilaian koncer berhasil disimpan.');
         } catch (\Throwable $e) {

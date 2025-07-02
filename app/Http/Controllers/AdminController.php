@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Penilaian;
+use App\Models\User;
+use App\Models\Bendera;
+use App\Models\Burung;
+use App\Models\Kelas;
+use App\Models\JenisBurung;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -227,5 +232,100 @@ class AdminController extends Controller
         }
 
         return view('admin.hasil_lomba.show', compact('penilaians', 'nomor'));
+    }
+
+    public function pantauLomba(Request $request)
+    {
+        $burungId = $request->burung_id;
+        $kelasId = $request->kelas_id;
+        $tahapId = $request->tahap_id ?? 1;
+
+        $listBurung = JenisBurung::all();
+        $listKelas = Kelas::all();
+        $juriList = User::role('juri')->get();
+
+        $benderaMap = $tahapId == 1
+            ? [
+                'penilaian_hijau' => 1,
+                'penilaian_putih' => 5,
+                'penilaian_hitam' => 6,
+            ]
+            : [
+                'penilaian_merah' => 2,
+                'penilaian_biru' => 3,
+                'penilaian_kuning' => 4,
+            ];
+
+        foreach ($juriList as $juri) {
+            foreach ($benderaMap as $key => $benderaId) {
+                $juri->$key = Penilaian::where('user_id', $juri->id)
+                    ->where('tahap_id', $tahapId)
+                    ->where('bendera_id', $benderaId)
+                    ->whereHas('burung', function ($q) use ($burungId, $kelasId) {
+                        $q->where('jenis_burung_id', $burungId)
+                            ->where('kelas_id', $kelasId);
+                    })
+                    ->with('blokGantangan.gantangan')
+                    ->get()
+                    ->map(function ($p) {
+                        return ['nomor' => $p->blokGantangan->gantangan->nomor ?? '-'];
+                    });
+            }
+        }
+
+        return view('admin.pantau_lomba.index', compact(
+            'juriList',
+            'listBurung',
+            'listKelas'
+        ));
+    }
+
+    public function pantauLombaData(Request $request)
+    {
+        $burungId = $request->burung_id;
+        $kelasId = $request->kelas_id;
+        $tahapId = $request->tahap_id ?? 1;
+
+        $juriList = User::role('juri')->get();
+
+        // Mapping nama-nama bendera agar lebih jelas dan tidak tertukar
+        $benderaMap = $tahapId == 1
+            ? [
+                'penilaian_hijau' => 1,
+                'penilaian_putih' => 5,
+                'penilaian_hitam' => 6,
+            ]
+            : [
+                'penilaian_merah' => 2,
+                'penilaian_biru' => 3,
+                'penilaian_kuning' => 4,
+            ];
+
+        foreach ($juriList as $juri) {
+            foreach ($benderaMap as $key => $benderaId) {
+                $juri->$key = Penilaian::where('user_id', $juri->id)
+                    ->where('tahap_id', $tahapId)
+                    ->where('bendera_id', $benderaId)
+                    ->whereHas('burung', function ($q) use ($burungId, $kelasId) {
+                        $q->where('jenis_burung_id', $burungId)
+                            ->where('kelas_id', $kelasId);
+                    })
+                    ->with('blokGantangan.gantangan')
+                    ->get()
+                    ->map(function ($p) {
+                        return ['nomor' => $p->blokGantangan->gantangan->nomor ?? '-'];
+                    });
+            }
+        }
+
+        return response()->json([
+            'data' => $juriList->map(function ($juri) use ($benderaMap) {
+                $result = ['nama' => $juri->name];
+                foreach (array_keys($benderaMap) as $key) {
+                    $result[$key] = $juri->$key;
+                }
+                return $result;
+            }),
+        ]);
     }
 }
