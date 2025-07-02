@@ -9,33 +9,16 @@ use Illuminate\Support\Facades\DB;
 
 class KelolaPemesananController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = Pemesanan::with([
+        $pemesanans = Pemesanan::with([
             'user',
             'lomba',
             'status',
             'gantangan',
             'burung.jenisBurung',
             'burung.kelas',
-        ]);
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%");
-            })->orWhereHas('lomba', function ($q) use ($search) {
-                $q->where('nama', 'like', "%$search%");
-            })->orWhereHas('burung.jenisBurung', function ($q) use ($search) {
-                $q->where('nama', 'like', "%$search%");
-            })->orWhereHas('burung.kelas', function ($q) use ($search) {
-                $q->where('nama', 'like', "%$search%");
-            })->orWhereHas('gantangan', function ($q) use ($search) {
-                $q->where('nomor', 'like', "%$search%");
-            });
-        }
-
-        $pemesanans = $query->orderBy('created_at', 'asc')->paginate(10); // urut dari yang paling awal
+        ])->orderBy('created_at', 'asc')->get(); // gunakan get() karena pakai DataTables
 
         return view('bendahara.index', compact('pemesanans'));
     }

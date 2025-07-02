@@ -61,6 +61,11 @@ Route::post('/email/verification-notification', function (Request $request) {
 Route::get('auth/google', [LoginController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [LoginController::class, 'handleGoogleCallback']);
 
+Route::get('/export-penilaian', [App\Http\Controllers\ExportPenilaianController::class, 'export'])->name('export.penilaian');
+Route::get('/export-hasil-lomba', [App\Http\Controllers\ExportHasilLombaController::class, 'export'])->name('export.hasil_lomba');
+Route::get('/data-pendaftaran/export', [\App\Http\Controllers\PendaftaranExportController::class, 'export'])->name('data-pendaftaran.export');
+
+
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('profil', ProfilController::class)->except('destroy');
 
@@ -100,7 +105,6 @@ Route::middleware(['auth', 'role:admin|superadmin|korlap|'])->group(function () 
     // Pantau Lomba Realtime
     Route::get('/pantau-lomba', [AdminController::class, 'pantauLomba'])->name('admin.pantau_lomba');
     Route::get('/admin/pantau-lomba/data', [AdminController::class, 'pantauLombaData'])->name('admin.pantau_lomba.data');
-
 });
 
 
