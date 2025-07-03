@@ -490,7 +490,7 @@
                         <div class="card border-0 shadow-sm h-100">
                             <div class="row g-0">
                                 <div class="col-md-5">
-                                    <img src="assets/images/berita3.png" class="img-fluid rounded-start h-100"
+                                    <img src="assets/images/berita2.png" class="img-fluid rounded-start h-100"
                                         alt="Update Silobur" style="object-fit: cover;">
                                 </div>
                                 <div class="col-md-7">
@@ -519,7 +519,7 @@
                         <div class="card border-0 shadow-sm h-100">
                             <div class="row g-0">
                                 <div class="col-md-5">
-                                    <img src="assets/images/berita2.png" class="img-fluid rounded-start h-100"
+                                    <img src="assets/images/berita3.png" class="img-fluid rounded-start h-100"
                                         alt="Anniversary Silobur Pati" style="object-fit: cover;">
                                 </div>
                                 <div class="col-md-7">
