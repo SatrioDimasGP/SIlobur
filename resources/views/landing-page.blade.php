@@ -464,11 +464,11 @@
                             target="_blank" class="text-decoration-none text-dark">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="row g-0">
-                                    <div class="col-md-5 order-md-1">
+                                    <div class="col-md-5">
                                         <img src="assets/images/berita1.png" class="img-fluid rounded-start h-100"
                                             alt="Kembalinya Silobur Baru 1" style="object-fit: cover;">
                                     </div>
-                                    <div class="col-md-7 order-md-2">
+                                    <div class="col-md-7">
                                         <div class="card-body">
                                             <div class="d-flex align-items-center mb-2">
                                                 <i class="far fa-calendar-alt me-2 text-muted"></i>
@@ -478,8 +478,8 @@
                                                 Gempita</h5>
                                             <p class="card-text redhat-font small">Silobur Baru 1 kembali hadir dengan
                                                 suasana lebih semarak. Kembalinya event ini menjadi magnet bagi
-                                                kicaumania karena sistem penilaian yang fair dan atmosfer kompetisi yang
-                                                sportif.
+                                                kicaumania
+                                                karena sistem penilaian yang fair dan atmosfer kompetisi yang sportif.
                                             </p>
                                         </div>
                                     </div>
@@ -494,11 +494,11 @@
                             target="_blank" class="text-decoration-none text-dark">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="row g-0">
-                                    <div class="col-md-5 order-md-1">
+                                    <div class="col-md-5">
                                         <img src="assets/images/berita3.png" class="img-fluid rounded-start h-100"
                                             alt="Anniversary Silobur Pati" style="object-fit: cover;">
                                     </div>
-                                    <div class="col-md-7 order-md-2">
+                                    <div class="col-md-7">
                                         <div class="card-body">
                                             <div class="d-flex align-items-center mb-2">
                                                 <i class="far fa-calendar-alt me-2 text-muted"></i>
@@ -528,18 +528,19 @@
                             target="_blank" class="text-decoration-none text-dark">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="row g-0">
-                                    <div class="col-md-5 order-md-1">
+                                    <div class="col-md-5">
                                         <img src="assets/images/berita2.png" class="img-fluid rounded-start h-100"
                                             alt="Update Silobur" style="object-fit: cover;">
                                     </div>
-                                    <div class="col-md-7 order-md-2">
+                                    <div class="col-md-7">
                                         <div class="card-body">
                                             <div class="d-flex align-items-center mb-2">
                                                 <i class="far fa-calendar-alt me-2 text-muted"></i>
                                                 <small class="text-muted redhat-font">Rabu, 21 Mei 2025</small>
                                             </div>
                                             <h5 class="card-title lexend-font">Melihat dari Dekat Event Silobur Setelah
-                                                Up Date: Apa yang Baru?</h5>
+                                                Up
+                                                Date: Apa yang Baru?</h5>
                                             <p class="card-text redhat-font small">Silobur mengaktifkan kembali
                                                 tiketing
                                                 online dan software penjurian. Perbaikannya ditangani oleh tim IT
@@ -557,7 +558,6 @@
             </div>
         </div>
     </section>
-
 
     {{-- Call to Action --}}
     {{--
