@@ -450,95 +450,110 @@
     <section class="py-5" id="berita">
         <div class="container">
             <h2 class="fw-semibold mb-3 lexend-font">Berita</h2>
-            <p class="mb-4 redhat-font fw-light">Simak kabar terbaru dari dunia lomba burung versi SILOBUR, mulai dari
-                event seru,
-                sistem baru, hingga pengalaman para peserta.</p>
+            <p class="mb-4 redhat-font fw-light">
+                Simak kabar terbaru dari dunia lomba burung versi SILOBUR, mulai dari event seru,
+                sistem baru, hingga pengalaman para peserta.
+            </p>
 
             <div class="row">
-                <!-- Artikel 1 (Kembalinya Silobur Baru 1) -->
-                <div class="col-md-6 mb-4">
-                    <a href="https://burungnews.com/kembalinya-silobur-baru-1-mengapa-disambut-gegap-gempita-berita-27658/"
-                        target="_blank" class="text-decoration-none text-dark">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="row g-0">
-                                <div class="col-md-5">
-                                    <img src="assets/images/berita1.png" class="img-fluid rounded-start h-100"
-                                        alt="Kembalinya Silobur Baru 1" style="object-fit: cover;">
-                                </div>
-                                <div class="col-md-7">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="far fa-calendar-alt me-2 text-muted"></i>
-                                            <small class="text-muted redhat-font">Rabu, 23 April 2025</small>
+                <!-- Kolom kiri: Berita 1 & 3 -->
+                <div class="col-md-6">
+                    <!-- Artikel 1 -->
+                    <div class="mb-4">
+                        <a href="https://burungnews.com/kembalinya-silobur-baru-1-mengapa-disambut-gegap-gempita-berita-27658/"
+                            target="_blank" class="text-decoration-none text-dark">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="row g-0">
+                                    <div class="col-md-5">
+                                        <img src="assets/images/berita1.png" class="img-fluid rounded-start h-100"
+                                            alt="Kembalinya Silobur Baru 1" style="object-fit: cover;">
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="far fa-calendar-alt me-2 text-muted"></i>
+                                                <small class="text-muted redhat-font">Rabu, 23 April 2025</small>
+                                            </div>
+                                            <h5 class="card-title lexend-font">Kembalinya Silobur Baru 1 Disambut Gegap
+                                                Gempita</h5>
+                                            <p class="card-text redhat-font small">Silobur Baru 1 kembali hadir dengan
+                                                suasana lebih semarak. Kembalinya event ini menjadi magnet bagi
+                                                kicaumania
+                                                karena sistem penilaian yang fair dan atmosfer kompetisi yang sportif.
+                                            </p>
                                         </div>
-                                        <h5 class="card-title lexend-font">Kembalinya Silobur Baru 1 Disambut Gegap
-                                            Gempita</h5>
-                                        <p class="card-text redhat-font small">Silobur Baru 1 kembali hadir dengan
-                                            suasana lebih semarak. Kembalinya event ini menjadi magnet bagi kicaumania
-                                            karena sistem penilaian yang fair dan atmosfer kompetisi yang sportif.</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
+
+                    <!-- Artikel 3 -->
+                    <div class="mb-4">
+                        <a href="https://burungnews.com/anniversary-silobur-pati-jadi-ajang-reuni-banyak-pendatang-baru-penasaran-silobur-updated-berita-27727/"
+                            target="_blank" class="text-decoration-none text-dark">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="row g-0">
+                                    <div class="col-md-5">
+                                        <img src="assets/images/berita3.png" class="img-fluid rounded-start h-100"
+                                            alt="Anniversary Silobur Pati" style="object-fit: cover;">
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="far fa-calendar-alt me-2 text-muted"></i>
+                                                <small class="text-muted redhat-font">Senin, 5 Mei 2025</small>
+                                            </div>
+                                            <h5 class="card-title lexend-font">ANNIVERSARY SILOBUR PATI: Jadi Ajang
+                                                Reuni,
+                                                Banyak Pendatang Baru Penasaran</h5>
+                                            <p class="card-text redhat-font small">Gelaran perdana Anniversary Silobur
+                                                Pati
+                                                pada 4 Mei 2025 menjadi momen reuni sekaligus ajang perkenalan sistem
+                                                Silobur yang telah diperbarui, menarik banyak peserta lama maupun
+                                                pendatang
+                                                baru.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
 
-                <!-- Artikel 2 (Update Silobur) -->
-                <div class="col-md-6 mb-4">
-                    <a href="https://burungnews.com/melihat-dari-dekat-event-silobur-setelah-up-date-apanya-yang-baru-berita-27831/"
-                        target="_blank" class="text-decoration-none text-dark">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="row g-0">
-                                <div class="col-md-5">
-                                    <img src="assets/images/berita2.png" class="img-fluid rounded-start h-100"
-                                        alt="Update Silobur" style="object-fit: cover;">
-                                </div>
-                                <div class="col-md-7">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="far fa-calendar-alt me-2 text-muted"></i>
-                                            <small class="text-muted redhat-font">Rabu, 21 Mei 2025</small>
+                <!-- Kolom kanan: Artikel 2 -->
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <a href="https://burungnews.com/melihat-dari-dekat-event-silobur-setelah-up-date-apanya-yang-baru-berita-27831/"
+                            target="_blank" class="text-decoration-none text-dark">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="row g-0">
+                                    <div class="col-md-5">
+                                        <img src="assets/images/berita2.png" class="img-fluid rounded-start h-100"
+                                            alt="Update Silobur" style="object-fit: cover;">
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="far fa-calendar-alt me-2 text-muted"></i>
+                                                <small class="text-muted redhat-font">Rabu, 21 Mei 2025</small>
+                                            </div>
+                                            <h5 class="card-title lexend-font">Melihat dari Dekat Event Silobur Setelah
+                                                Up
+                                                Date: Apa yang Baru?</h5>
+                                            <p class="card-text redhat-font small">Silobur mengaktifkan kembali
+                                                tiketing
+                                                online dan software penjurian. Perbaikannya ditangani oleh tim IT
+                                                Silobur,
+                                                Dimas putra dari om Masturi KM sebagai upaya menyempurnakan sistem
+                                                manual
+                                                penilaian berbasis digital.</p>
                                         </div>
-                                        <h5 class="card-title lexend-font">Melihat dari Dekat Event Silobur Setelah Up
-                                            Date: Apa yang Baru?</h5>
-                                        <p class="card-text redhat-font small">Silobur mengaktifkan kembali tiketing
-                                            online dan software penjurian. Perbaikannya ditangani oleh tim IT Silobur,
-                                            Dimas putra dari om Masturi KM sebagai upaya menyempurnakan sistem manual
-                                            penilaian berbasis digital.</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Artikel 3 (Anniversary Silobur Pati) -->
-                <div class="col-md-6 mb-4">
-                    <a href="https://burungnews.com/anniversary-silobur-pati-jadi-ajang-reuni-banyak-pendatang-baru-penasaran-silobur-updated-berita-27727/"
-                        target="_blank" class="text-decoration-none text-dark">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="row g-0">
-                                <div class="col-md-5">
-                                    <img src="assets/images/berita3.png" class="img-fluid rounded-start h-100"
-                                        alt="Anniversary Silobur Pati" style="object-fit: cover;">
-                                </div>
-                                <div class="col-md-7">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="far fa-calendar-alt me-2 text-muted"></i>
-                                            <small class="text-muted redhat-font">Senin, 5 Mei 2025</small>
-                                        </div>
-                                        <h5 class="card-title lexend-font">ANNIVERSARY SILOBUR PATI: Jadi Ajang Reuni,
-                                            Banyak Pendatang Baru Penasaran</h5>
-                                        <p class="card-text redhat-font small">Gelaran perdana Anniversary Silobur Pati
-                                            pada 4 Mei 2025 menjadi momen reuni sekaligus ajang perkenalan sistem
-                                            Silobur yang telah diperbarui, menarik banyak peserta lama maupun pendatang
-                                            baru.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
