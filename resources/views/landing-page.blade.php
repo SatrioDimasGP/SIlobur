@@ -438,7 +438,7 @@
                 Tersedia</p>
 
             <div class="d-flex justify-content-center">
-                <img src="{{ asset('assets/images/jadwal.jpg') }}" alt="Petugas Sampah" class="img-fluid"
+                <img src="{{ asset('assets/images/jadwal.jpg') }}" alt="jadwal lomba" class="img-fluid"
                     style="max-width: 400px;">
             </div>
         </div>
@@ -469,7 +469,7 @@
                                     <div class="card-body">
                                         <div class="d-flex align-items-center mb-2">
                                             <i class="far fa-calendar-alt me-2 text-muted"></i>
-                                            <small class="text-muted redhat-font">Senin, 24 Juni 2024</small>
+                                            <small class="text-muted redhat-font">Rabu, 23 April 2025</small>
                                         </div>
                                         <h5 class="card-title lexend-font">Kembalinya Silobur Baru 1 Disambut Gegap
                                             Gempita</h5>
@@ -490,14 +490,14 @@
                         <div class="card border-0 shadow-sm h-100">
                             <div class="row g-0">
                                 <div class="col-md-5">
-                                    <img src="assets/images/berita3.png" class="img-fluid rounded-start h-100"
+                                    <img src="assets/images/berita2.png" class="img-fluid rounded-start h-100"
                                         alt="Update Silobur" style="object-fit: cover;">
                                 </div>
                                 <div class="col-md-7">
                                     <div class="card-body">
                                         <div class="d-flex align-items-center mb-2">
                                             <i class="far fa-calendar-alt me-2 text-muted"></i>
-                                            <small class="text-muted redhat-font">Senin, 1 Juli 2025</small>
+                                            <small class="text-muted redhat-font">Rabu, 21 Mei 2025</small>
                                         </div>
                                         <h5 class="card-title lexend-font">Melihat dari Dekat Event Silobur Setelah Up
                                             Date: Apa yang Baru?</h5>
@@ -519,7 +519,7 @@
                         <div class="card border-0 shadow-sm h-100">
                             <div class="row g-0">
                                 <div class="col-md-5">
-                                    <img src="assets/images/berita2.png" class="img-fluid rounded-start h-100"
+                                    <img src="assets/images/berita3.png" class="img-fluid rounded-start h-100"
                                         alt="Anniversary Silobur Pati" style="object-fit: cover;">
                                 </div>
                                 <div class="col-md-7">
