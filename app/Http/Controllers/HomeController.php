@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\Pemesanan;
 use App\Models\Role;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -63,7 +64,13 @@ class HomeController extends Controller
         }
 
         if ($role->name == 'user') {
-            return view('home');
+            $lombaTerbuka = \App\Models\Lomba::where('status_lomba_id', 1)
+                ->whereNull('deleted_at')
+                ->orderBy('tanggal')
+                ->get();
+            // dd($lombaTerbuka);
+
+            return view('home', compact('lombaTerbuka'));
         }
 
         return view('home');
