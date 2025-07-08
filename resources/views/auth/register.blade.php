@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link href="{{ asset('') }}assets/css/app.css" rel="stylesheet">
     <link href="{{ asset('') }}assets/css/icons.css" rel="stylesheet">
-                <link rel="icon" href="{{ asset('') }}assets/images/login-images/logo-silobur.png" type="image/png" />
+    <link rel="icon" href="{{ asset('') }}assets/images/login-images/logo-silobur.png" type="image/png" />
 
     <title>{{ env('APP_NAME', 'Silobur') }}</title>
 </head>
@@ -33,8 +33,9 @@
 
                         <div class="card shadow-none bg-transparent shadow-none rounded-0 mb-0">
                             <div class="card-body">
-                                <img src="{{ asset('') }}assets/images/login-images/register-cover.svg"
-                                    class="img-fluid auth-img-cover-login" width="500" alt="" />
+                                <img src="{{ asset('') }}assets/images/login-images/logo-silobur.png"
+                                    class="img-fluid auth-img-cover-login" style="transform: none;" width="500"
+                                    alt="" />
                             </div>
                         </div>
 
@@ -55,7 +56,7 @@
                                                 <input type="text" name="name"
                                                     class="form-control @error('name') is-invalid @enderror"
                                                     value="{{ old('name') }}" id="inputUsername"
-                                                    placeholder="Nama Lengkap Sesuai Ijazah">
+                                                    placeholder="Nama Lengkap Sesuai KTP">
                                                 @error('name')
                                                     <span class="invalid-feedback" role="alert">
                                                         <strong>{{ $message }}</strong>
@@ -104,7 +105,8 @@
                                             </div>
                                             <div class="col-12">
                                                 <div class="d-grid">
-                                                    <button type="submit" class="btn btn-primary btn-sm">Daftar</button>
+                                                    <button type="submit"
+                                                        class="btn btn-primary btn-sm">Daftar</button>
                                                 </div>
                                             </div>
                                             <div class="col-12">
