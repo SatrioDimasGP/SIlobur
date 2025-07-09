@@ -2,21 +2,27 @@
 
 @section('content')
     <div class="container">
-        <h1 class="mb-4">Edit Kelas</h1>
-
-        {{-- Tombol kembali --}}
-        <div class="mb-3">
+        {{-- Judul dan Tombol Kembali --}}
+        <h1 class="mb-4 d-flex justify-content-between align-items-center">
+            <span>Edit Kelas</span>
             <a href="{{ route('manajemen-lomba.kelola', ['id' => $lomba_id]) }}" class="btn btn-tool">
-                <i class="fas fa-arrow-alt-circle-left"></i> Kembali
+                <i class="fas fa-arrow-alt-circle-left"></i>
             </a>
-        </div>
+        </h1>
 
+        {{-- Flash Message --}}
         @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Tutup">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
         @endif
 
+        {{-- Form Edit --}}
         <div class="card">
-            <div class="card-header">Edit Kelas</div>
+            <div class="card-header">Form Edit Kelas</div>
             <div class="card-body">
                 <form
                     action="{{ route('manajemen-lomba.kelola.kelas.update', ['lomba_id' => $lomba_id, 'id' => $kelas->id]) }}"
@@ -35,7 +41,6 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                 </form>
-
             </div>
         </div>
     </div>
