@@ -16,7 +16,7 @@
     {{-- Tombol kembali --}}
     <div class="mb-3 d-flex justify-content-end">
         <a href="{{ route('manajemen-lomba.kelola', $lomba_id) }}" class="btn btn-tool">
-            <i class="fas fa-arrow-alt-circle-left"></i> Kembali
+            <i class="fas fa-arrow-alt-circle-left"></i>
         </a>
     </div>
 
