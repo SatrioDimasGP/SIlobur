@@ -223,8 +223,9 @@
                                 @forelse($blokGantangans as $item)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $item->blok->nama }}</td>
-                                        <td>No {{ $item->gantangan->nomor }}</td>
+                                        <td>{{ $item->blok?->nama ?? '[Blok Tidak Ditemukan]' }}</td>
+                                        <td>{{ $item->gantangan?->nomor ? 'No ' . $item->gantangan->nomor : '[Gantangan Tidak Ditemukan]' }}
+                                        </td>
                                         <td>
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-outline-info dropdown-toggle"
