@@ -25,7 +25,15 @@ class KonfigurasiBlokController extends Controller
             ->get();
         $lombas = Lomba::all();
         $gantangans = Gantangan::all();
-        dd($bloks->pluck('burung'));
+        // dd($bloks->pluck('burung'));
+        dd($bloks->map(function ($blok) {
+            return [
+                'blok_id' => $blok->id,
+                'burung_id' => $blok->burung?->id,
+                'jenis_burung' => $blok->burung?->jenisBurung?->nama,
+                'kelas' => $blok->burung?->kelas?->nama,
+            ];
+        }));
 
         $blokGantangans = BlokGantangan::with('blok', 'gantangan')
             ->when($search, function ($query, $search) {
