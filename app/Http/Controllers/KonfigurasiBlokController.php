@@ -23,22 +23,6 @@ class KonfigurasiBlokController extends Controller
             ->whereHas('burung.jenisBurung')
             ->whereHas('burung.kelas')
             ->get();
-        $blokRusak = $bloks->filter(function ($blok) {
-            return !$blok->burung || !$blok->burung->jenisBurung || !$blok->burung->kelas;
-        });
-
-        if ($blokRusak->isNotEmpty()) {
-            dd($blokRusak->map(function ($blok) {
-                return [
-                    'blok_id' => $blok->id,
-                    'blok_nama' => $blok->nama,
-                    'burung_id' => $blok->burung?->id,
-                    'jenis_burung' => $blok->burung?->jenisBurung?->nama,
-                    'kelas' => $blok->burung?->kelas?->nama,
-                ];
-            }));
-        }
-
         $lombas = Lomba::all();
         $gantangans = Gantangan::all();
         // dd($bloks->pluck('burung'));
@@ -57,6 +41,21 @@ class KonfigurasiBlokController extends Controller
                     ->orWhereHas('gantangan', fn($q) => $q->where('nomor', 'like', "%$search%"));
             })
             ->get();
+        $blokGantangansRusak = $blokGantangans->filter(function ($item) {
+            return !$item->blok || !$item->gantangan;
+        });
+
+        if ($blokGantangansRusak->isNotEmpty()) {
+            logger()->warning('Relasi rusak pada BlokGantangan:', $blokGantangansRusak->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'blok_id' => $item->blok_id,
+                    'gantangan_id' => $item->gantangan_id,
+                    'blok' => $item->blok,
+                    'gantangan' => $item->gantangan,
+                ];
+            })->toArray());
+        }
 
         return view('korlap.konfigurasi_blok.index', compact('bloks', 'lombas', 'gantangans', 'blokGantangans'));
     }
