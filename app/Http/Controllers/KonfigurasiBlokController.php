@@ -18,7 +18,10 @@ class KonfigurasiBlokController extends Controller
         $search = $request->get('search');
 
         $bloks = Blok::with(['lomba', 'burung.jenisBurung', 'burung.kelas'])
-            ->whereHas('lomba') // hanya ambil blok yang masih punya lomba aktif
+            ->whereHas('lomba')
+            ->whereHas('burung')
+            ->whereHas('burung.jenisBurung')
+            ->whereHas('burung.kelas')
             ->get();
         $lombas = Lomba::all();
         $gantangans = Gantangan::all();
