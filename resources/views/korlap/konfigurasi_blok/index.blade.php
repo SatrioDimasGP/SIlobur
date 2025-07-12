@@ -127,30 +127,30 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $blok->nama }}</td>
-                                        {{-- <td>{{ $blok->lomba->nama ?? '-' }}</td> --}}
                                         <td>
                                             {{ optional(optional($blok->burung)->jenisBurung)->nama ?? '-' }} -
                                             {{ optional(optional($blok->burung)->kelas)->nama ?? '-' }}
                                         </td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-outline-info dropdown-toggle"
-                                                data-toggle="dropdown">
-                                                <i class="fas fa-cog"></i>
-                                            </button>
-                                            <ul class="dropdown-menu">
-                                                <li>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('konfigurasi-blok.edit', $blok->id) }}">Edit</a>
-                                                </li>
-                                                <li>
-                                                    <form action="{{ route('konfigurasi-blok.destroy', $blok->id) }}"
-                                                        method="POST" onsubmit="return confirm('Hapus blok ini?')">
-                                                        @csrf @method('DELETE')
-                                                        <button class="dropdown-item" type="submit">Hapus</button>
-                                                    </form>
-                                                </li>
-                                            </ul>
-                                        </div>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-info dropdown-toggle"
+                                                    data-toggle="dropdown">
+                                                    <i class="fas fa-cog"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('konfigurasi-blok.edit', $blok->id) }}">Edit</a>
+                                                    </li>
+                                                    <li>
+                                                        <form action="{{ route('konfigurasi-blok.destroy', $blok->id) }}"
+                                                            method="POST" onsubmit="return confirm('Hapus blok ini?')">
+                                                            @csrf @method('DELETE')
+                                                            <button class="dropdown-item" type="submit">Hapus</button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
