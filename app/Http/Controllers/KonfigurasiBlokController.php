@@ -41,21 +41,6 @@ class KonfigurasiBlokController extends Controller
                     ->orWhereHas('gantangan', fn($q) => $q->where('nomor', 'like', "%$search%"));
             })
             ->get();
-        $blokGantangansRusak = $blokGantangans->filter(function ($item) {
-            return !$item->blok || !$item->gantangan;
-        });
-
-        if ($blokGantangansRusak->isNotEmpty()) {
-            logger()->warning('Relasi rusak pada BlokGantangan:', $blokGantangansRusak->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'blok_id' => $item->blok_id,
-                    'gantangan_id' => $item->gantangan_id,
-                    'blok' => $item->blok,
-                    'gantangan' => $item->gantangan,
-                ];
-            })->toArray());
-        }
 
         return view('korlap.konfigurasi_blok.index', compact('bloks', 'lombas', 'gantangans', 'blokGantangans'));
     }
