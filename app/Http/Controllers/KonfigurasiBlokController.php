@@ -23,6 +23,22 @@ class KonfigurasiBlokController extends Controller
             ->whereHas('burung.jenisBurung')
             ->whereHas('burung.kelas')
             ->get();
+        $blokRusak = $bloks->filter(function ($blok) {
+            return !$blok->burung || !$blok->burung->jenisBurung || !$blok->burung->kelas;
+        });
+
+        if ($blokRusak->isNotEmpty()) {
+            dd($blokRusak->map(function ($blok) {
+                return [
+                    'blok_id' => $blok->id,
+                    'blok_nama' => $blok->nama,
+                    'burung_id' => $blok->burung?->id,
+                    'jenis_burung' => $blok->burung?->jenisBurung?->nama,
+                    'kelas' => $blok->burung?->kelas?->nama,
+                ];
+            }));
+        }
+
         $lombas = Lomba::all();
         $gantangans = Gantangan::all();
         // dd($bloks->pluck('burung'));
