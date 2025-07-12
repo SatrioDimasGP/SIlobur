@@ -128,8 +128,8 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $blok->nama }}</td>
                                         {{-- <td>{{ $blok->lomba->nama ?? '-' }}</td> --}}
-                                        <td>{{ optional(optional($blok->burung)->jenisBurung)->nama ?? '-' }} -
-                                            {{ optional(optional($blok->burung)->kelas)->nama ?? '-' }}</td>
+                                        <td>{{ $blok->burung->jenisBurung->nama ?? '-' }} -
+                                            {{ $blok->burung->kelas->nama ?? '-' }}</td>
                                         <td>
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-outline-info dropdown-toggle"
@@ -175,9 +175,10 @@
                                 <select name="blok_id" class="form-select @error('blok_id') is-invalid @enderror" required>
                                     <option value="">-- Pilih Blok --</option>
                                     @foreach ($bloks as $blok)
-                                        <option value="{{ $blok->id }}">{{ $blok->nama }} -
-                                            {{-- {{ $blok->lomba->nama ?? '-' }} - --}}
-                                            {{ $blok->burung->jenisBurung->nama ?? '?' }} - {{ $blok->burung->kelas->nama ?? '?' }}
+                                        <option value="{{ $blok->id }}">
+                                            {{ $blok->nama }} -
+                                            {{ optional(optional($blok->burung)->jenisBurung)->nama ?? '?' }} -
+                                            {{ optional(optional($blok->burung)->kelas)->nama ?? '?' }}
                                         </option>
                                     @endforeach
                                 </select>
