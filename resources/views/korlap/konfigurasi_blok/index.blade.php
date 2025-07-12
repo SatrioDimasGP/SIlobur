@@ -128,8 +128,8 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $blok->nama }}</td>
                                         {{-- <td>{{ $blok->lomba->nama ?? '-' }}</td> --}}
-                                        <td>{{ $blok->burung->jenisBurung->nama ?? '-' }} -
-                                            {{ $blok->burung->kelas->nama ?? '-' }}</td>
+                                        <td>{{ optional(optional($blok->burung)->jenisBurung)->nama ?? '-' }} -
+                                            {{ optional(optional($blok->burung)->kelas)->nama ?? '-' }}</td>
                                         <td>
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-outline-info dropdown-toggle"
