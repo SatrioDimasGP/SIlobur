@@ -113,39 +113,64 @@
                                 <input type="hidden" name="lomba_id" value="{{ $lomba->id }}">
                                 <input type="hidden" name="jenis_burung_id" id="jenis_burung_id_hidden" value="">
                                 <input type="hidden" name="kelas_id" id="kelas_id_hidden" value="">
-                                <div class="row">`;
+                                @if ($blok->gantangans->isEmpty())
+                                <div class="alert alert-warning text-center">
+                                    Tidak ada nomor gantangan pada blok ini.
+                                </div>
+                            @else
+                                <div class="row">
+                                    @foreach ($blok->gantangans->sortBy('gantangan.nomor') as $index => $item)
+                                        <div class="col-md-4 mb-4">
+                                            <div
+                                                class="card text-center shadow-sm {{ in_array($item->id, $blokGantanganTerblokir) ? 'bg-light text-muted border-secondary' : '' }}">
+                                                <div class="card-body p-2">
+                                                    <h5 class="card-title mb-3">
+                                                        Nomor: {{ $item->gantangan->nomor }}
+                                                    </h5>
 
-                            data.nomorLolosKoncer.forEach((blok) => {
-                                formHTML += `
-        <div class="col-md-4 mb-4">
-            <div class="card text-center shadow-sm">
-                <div class="card-body p-2">
-                    <h5 class="card-title mb-3">Nomor: ${blok.gantangan.nomor}</h5>
-                    <div class="d-flex justify-content-around">
-                        <label class="badge bg-danger">
-                            <input type="radio" name="penilaian[${blok.id}][bendera]" value="${blok.bendera_merah_id}">
-                            Merah
-                        </label>
-                        <label class="badge bg-primary">
-                            <input type="radio" name="penilaian[${blok.id}][bendera]" value="${blok.bendera_biru_id}">
-                            Biru
-                        </label>
-                        <label class="badge" style="background-color: #f7e700; color: #000; border: 1px solid #ddd;">
-                            <input type="radio" name="penilaian[${blok.id}][bendera]" value="${blok.bendera_kuning_id}">
-                            Kuning
-                        </label>
-                    </div>
-                    <input type="hidden" name="penilaian[${blok.id}][gantanganId]" value="${blok.id}">
-                </div>
-            </div>
-        </div>`;
-                            });
+                                                    @php
+                                                        $name = "penilaian[{$item->id}][bendera]";
+                                                        $benderaPutih = $benderas->where('nama', 'putih')->first();
+                                                        $benderaHijau = $benderas->where('nama', 'hijau')->first();
+                                                        $benderaHitam = $benderas->where('nama', 'hitam')->first();
+                                                        $terblokir = in_array($item->id, $blokGantanganTerblokir);
+                                                    @endphp
 
-                            formHTML += `
+                                                    @if ($terblokir)
+                                                        <p class="text-danger mt-3 mb-0">Sudah diberi bendera hitam oleh juri lain</p>
+                                                    @else
+                                                        <div class="d-flex justify-content-around">
+                                                            <label class="badge bg-success">
+                                                                <input type="radio" name="{{ $name }}" value="{{ $benderaHijau->id }}">
+                                                                Hijau
+                                                            </label>
+                                                            <label class="badge"
+                                                                style="background-color: #ffffff; color: #000; border: 1px solid #ddd;">
+                                                                <input type="radio" name="{{ $name }}" value="{{ $benderaPutih->id }}">
+                                                                Putih
+                                                            </label>
+                                                            <label class="badge bg-dark text-white">
+                                                                <input type="radio" name="{{ $name }}" value="{{ $benderaHitam->id }}">
+                                                                Hitam
+                                                            </label>
+                                                        </div>
+                                                    @endif
+
+                                                    <input type="hidden" name="penilaian[{{ $item->id }}][gantanganId]"
+                                                        value="{{ $item->id }}">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if (($index + 1) % 3 == 0)
+                                            <div class="w-100"></div>
+                                        @endif
+                                    @endforeach
                                 </div>
                                 <div class="text-center mt-4">
                                     <button type="submit" class="btn btn-primary">Submit Penilaian</button>
                                 </div>
+                            @endif
                             </form>`;
 
                             blokList.innerHTML = formHTML;
