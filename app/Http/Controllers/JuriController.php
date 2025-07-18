@@ -475,6 +475,7 @@ class JuriController extends Controller
         $benderaBiruId = Bendera::where('nama', 'Biru')->value('id');
         $benderaKuningId = Bendera::where('nama', 'Kuning')->value('id');
         $benderaPutihId = Bendera::where('nama', 'Putih')->value('id');
+        $benderaHitamId = Bendera::where('nama', 'Hitam')->value('id');
 
         // Hitung kebutuhan penilaian tahap Ajuan
         // $jumlahJuri = JuriTugas::where('lomba_id', $lombaId)->distinct('user_id')->count('user_id');
@@ -546,7 +547,8 @@ class JuriController extends Controller
         $rekapPenilaian = Penilaian::select(
             'blok_gantangan_id',
             DB::raw("SUM(CASE WHEN bendera_id = {$benderaHijauId} THEN 1 ELSE 0 END) as total_hijau"),
-            DB::raw("SUM(CASE WHEN bendera_id = {$benderaPutihId} THEN 1 ELSE 0 END) as total_putih")
+            DB::raw("SUM(CASE WHEN bendera_id = {$benderaPutihId} THEN 1 ELSE 0 END) as total_putih"),
+            DB::raw("SUM(CASE WHEN bendera_id = {$benderaHitamId} THEN 1 ELSE 0 END) as total_hitam")
         )
             ->where('tahap_id', $tahapAjuanId)
             ->where('lomba_id', $lombaId)
@@ -557,19 +559,13 @@ class JuriController extends Controller
             })
             ->groupBy('blok_gantangan_id')
             ->get()
+            // Filter burung yang tidak terkena diskualifikasi
+            ->filter(fn($item) => $item->total_hitam == 0)
             ->sortBy([
                 ['total_hijau', 'desc'],
-                ['total_putih', 'asc'], // putih sebagai penentu tie-break
+                ['total_putih', 'asc'],
             ])
             ->values();
-        Log::debug('Hasil rekapPenilaian:', $rekapPenilaian->toArray());
-        if ($rekapPenilaian->isEmpty()) {
-            return response()->json([
-                'status' => 'empty',
-                'message' => 'Data penilaian tidak ditemukan atau belum lengkap.',
-                'nomorLolosKoncer' => [],
-            ]);
-        }
 
         $maxHijau = $rekapPenilaian->first()->total_hijau; // karena sudah diurutkan
         $blokGantanganMaxHijau = $rekapPenilaian->filter(fn($item) => $item->total_hijau == $maxHijau);

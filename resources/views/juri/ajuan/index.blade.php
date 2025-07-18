@@ -65,33 +65,31 @@
                     </thead>
                     <tbody>
                         ${data.bloks.map(blok => `
-                                                                                                                                                    <tr class="border-t">
-                                                                                                                                                        <td class="px-4 py-2">${blok.nama}</td>
-                                                                                                                                                        <td class="px-4 py-2">
-                                                                                                                                                            ${blok.sudah_dinilai ? `
-                                        <button class="bg-gray-400 !text-black font-bold py-2 px-4 rounded w-auto cursor-not-allowed" disabled>
-                                            Sudah Dinilai
-                                        </button>
-                                    ` : `
-                                        <button type="button"
-                                            class="bg-blue-500 hover:bg-blue-700 !text-black font-bold py-2 px-4 rounded w-auto"
-                                            onclick="window.location.href='/penilaian-ajuan/${lombaId}/${blok.id}?jenis_burung_id=${jenisId}&kelas_id=${kelasId}'">
-                                            Lakukan Penilaian
-                                        </button>
-                                    `}
-                                                                                                                                                        </td>
-                                                                                                                                                    </tr>
-                                                                                                                                                `).join('')}
+                        <tr class="border-t">
+                            <td class="px-4 py-2">${blok.nama}</td>
+                            <td class="px-4 py-2">
+                                ${blok.sudah_dinilai ? `
+                            <button class="bg-gray-400 !text-black font-bold py-2 px-4 rounded w-auto cursor-not-allowed" disabled>
+                                Sudah Dinilai
+                            </button>
+                        ` : `
+                            <button type="button"
+                            class="bg-blue-500 hover:bg-blue-700 !text-black font-bold py-2 px-4 rounded w-auto"
+                            onclick="window.location.href='/penilaian-ajuan/${lombaId}/${blok.id}?jenis_burung_id=${jenisId}&kelas_id=${kelasId}'">
+                            Lakukan Penilaian
+                            </button>
+                            `}
+                                </td>
+                            </tr>
+                        `).join('')}
                     </tbody>
                 `;
-                            blokList.appendChild(tbl);
-                        })
-                        .catch(() => alert('Gagal memuat data blok'));
+                blokList.appendChild(tbl);
+                })
+                .catch(() => alert('Gagal memuat data blok'));
                 };
             </script>
         @endif
-
-
 
         <div class="mb-4">
             <label for="jenis_burung_id" class="form-label">Jenis Burung</label>
@@ -165,18 +163,18 @@
                     const tbl = document.createElement('table');
                     tbl.className = 'table-auto w-full bg-white shadow-md rounded-lg';
                     tbl.innerHTML = `
-        <thead class="bg-gray-100 text-left">
-            <tr>
-                <th class="px-4 py-2">Nama Blok</th>
-                <th class="px-4 py-2">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${data.bloks.map(blok => `
-                                                            <tr class="border-t">
-                                                                <td class="px-4 py-2">${blok.nama}</td>
-                                                                <td class="px-4 py-2">
-                                                                    ${blok.sudah_dinilai ? `
+                    <thead class="bg-gray-100 text-left">
+                        <tr>
+                            <th class="px-4 py-2">Nama Blok</th>
+                            <th class="px-4 py-2">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.bloks.map(blok => `
+                            <tr class="border-t">
+                                <td class="px-4 py-2">${blok.nama}</td>
+                                <td class="px-4 py-2">
+                                    ${blok.sudah_dinilai ? `
                             <button class="bg-gray-400 !text-black font-bold py-2 px-4 rounded w-auto cursor-not-allowed" disabled>
                                 Sudah Dinilai
                             </button>
@@ -187,11 +185,11 @@
                                 Lakukan Penilaian
                             </button>
                         `}
-                                </td>
-                                           </tr>
-                                                        `).join('')}
-        </tbody>
-    `;
+                        </td>
+                        </tr>
+                        `).join('')}
+                        </tbody>
+                        `;
                     blokList.appendChild(tbl);
                 })
                 .catch(() => alert('Gagal memuat data blok'));
