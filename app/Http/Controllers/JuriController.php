@@ -448,6 +448,21 @@ class JuriController extends Controller
                 'message' => 'Parameter lomba_id, jenis_burung_id, dan kelas_id wajib diisi',
             ], 400);
         }
+        $ditugaskan = JuriTugas::where('user_id', $juriId)
+            ->where('lomba_id', $lombaId)
+            ->whereHas('blok.burung', function ($q) use ($jenisBurungId, $kelasId) {
+                $q->where('jenis_burung_id', $jenisBurungId)
+                    ->where('kelas_id', $kelasId);
+            })
+            ->exists();
+
+        if (!$ditugaskan) {
+            Log::warning('Juri tidak ditugaskan pada jenis burung & kelas ini', compact('juriId', 'lombaId', 'jenisBurungId', 'kelasId'));
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Anda tidak ditugaskan pada jenis burung dan kelas ini.',
+            ], 403);
+        }
 
         $tahapAjuanId = Tahap::where('nama', 'Ajuan')->value('id');
         $tahapKoncerId = Tahap::where('nama', 'Koncer')->value('id');
