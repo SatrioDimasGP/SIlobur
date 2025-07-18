@@ -563,17 +563,13 @@ class JuriController extends Controller
             ])
             ->values();
         Log::debug('Hasil rekapPenilaian:', $rekapPenilaian->toArray());
-
         if ($rekapPenilaian->isEmpty()) {
-            dd([
-                'rekapPenilaian' => $rekapPenilaian,
-                'jumlah_juri' => $jumlahJuri,
-                'blok_gantangan_ids' => $blokGantanganIds,
-                'total_dibutuhkan' => $totalSeharusnya,
-                'terisi' => $terisi,
+            return response()->json([
+                'status' => 'empty',
+                'message' => 'Data penilaian tidak ditemukan atau belum lengkap.',
+                'nomorLolosKoncer' => [],
             ]);
         }
-
 
         $maxHijau = $rekapPenilaian->first()->total_hijau; // karena sudah diurutkan
         $blokGantanganMaxHijau = $rekapPenilaian->filter(fn($item) => $item->total_hijau == $maxHijau);
