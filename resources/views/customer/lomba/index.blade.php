@@ -59,7 +59,7 @@
                                     </ul>
                                 </td>
                                 <td>
-                                    <span class="badge {{ optional($first->status)->nama === 'Lunas' ? 'bg-success' : 'bg-warning text-dark' }}">
+                                    <span class="badge {{ optional($first->status)->nama === 'Lunas' ? 'bg-success' : 'bg-succes text-dark' }}">
                                         {{ ucfirst(optional($first->status)->nama ?? '-') }}
                                     </span>
                                 </td>
