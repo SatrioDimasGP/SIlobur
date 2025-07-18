@@ -441,6 +441,25 @@ class JuriController extends Controller
 
         Log::info('Memulai proses mendapatkan nomor lolos koncer', compact('lombaId', 'jenisBurungId', 'kelasId', 'juriId'));
 
+        // Validasi apakah juri memang ditugaskan untuk jenis burung dan kelas ini
+        $ditugaskan = JuriTugas::where('user_id', $juriId)
+            ->where('lomba_id', $lombaId)
+            ->whereHas('blok.burung', function ($q) use ($jenisBurungId, $kelasId) {
+                $q->where('jenis_burung_id', $jenisBurungId)
+                    ->where('kelas_id', $kelasId);
+            })
+            ->exists();
+
+        if (!$ditugaskan) {
+            Log::warning('Juri tidak ditugaskan pada jenis burung & kelas ini', compact('juriId', 'lombaId', 'jenisBurungId', 'kelasId'));
+
+            return response()->json([
+                'status' => 'empty',
+                'message' => 'Anda tidak ditugaskan pada jenis burung dan kelas ini.',
+                'nomorLolosKoncer' => [],
+            ], 200);
+        }
+
         if (!$lombaId || !$jenisBurungId || !$kelasId) {
             Log::error('Input tidak lengkap');
             return response()->json([
