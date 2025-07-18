@@ -387,13 +387,6 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 
     // Menu: Lomba Saya
     Route::get('/lomba-saya', [LombaController::class, 'index'])->name('lomba.saya');
-    Route::get('/api/cek-qr/{transaksiId}', function ($transaksiId) {
-        $qrcode = \App\Models\RefQrcode::where('transaksi_id', $transaksiId)->first();
-        $path = 'qr_code/' . $qrcode->id . '.png';
-        return response()->json([
-            'qr_ready' => \Illuminate\Support\Facades\Storage::disk('public')->exists($path)
-        ]);
-    });
 
     // Detail Pemesanan
     Route::post('bayar', [PaymentController::class, 'proccess'])->name('pembayaran.store');
