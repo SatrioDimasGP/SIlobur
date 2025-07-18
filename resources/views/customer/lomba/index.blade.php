@@ -78,7 +78,18 @@
 @if(session('download_pdf') && session('transaksi_id'))
 <script>
     window.onload = function () {
-        window.location.href = "{{ route('pemesanans.bukti-pembayaran', session('transaksi_id')) }}";
+        const transaksiId = "{{ session('transaksi_id') }}";
+
+        fetch(`/api/cek-qr/${transaksiId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.qr_ready) {
+                    window.location.href = "{{ route('pemesanans.bukti-pembayaran', session('transaksi_id')) }}";
+                } else {
+                    // Ulangi cek QR dalam 1 detik
+                    setTimeout(() => location.reload(), 1000);
+                }
+            });
     };
 </script>
 @endif
