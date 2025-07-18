@@ -78,10 +78,18 @@
 
                     fetch(
                             `/ajax/nomor-lolos-koncer?jenis_burung_id=${jenisId}&kelas_id=${kelasId}&lomba_id={{ $lomba->id ?? 'null' }}`
-                            )
+                        )
                         .then(r => r.json())
                         .then(data => {
                             blokList.innerHTML = '';
+
+                            if (data.status === 'empty') {
+                                blokList.innerHTML = `
+                                <div class="alert alert-warning text-center">
+                                    ${data.message}
+                                </div>`;
+                                return;
+                            }
 
                             if (data.sudahMenilai) {
                                 blokList.innerHTML = `
