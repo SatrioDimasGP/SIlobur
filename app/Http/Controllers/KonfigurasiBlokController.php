@@ -24,7 +24,7 @@ class KonfigurasiBlokController extends Controller
             ->whereHas('burung.kelas')
             ->get();
         $lombas = Lomba::all();
-        $gantangans = Gantangan::all();
+        $gantangans = Gantangan::orderByRaw('CAST(nomor AS UNSIGNED)')->get();
         // dd($bloks->pluck('burung'));
         // dd($bloks->map(function ($blok) {
         //     return [
