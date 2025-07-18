@@ -644,6 +644,13 @@ class JuriController extends Controller
                 ];
             }
         }
+        dd([
+            'rekapPenilaian' => $rekapPenilaian,
+            'blokGantanganMaxHijau' => $blokGantanganMaxHijau,
+            'blokGantanganLangsungJuara1' => $blokGantanganLangsungJuara1,
+            'blokGantanganIdsKoncer' => $blokGantanganIdsKoncer,
+            'dataNomor' => $dataNomor,
+        ]);
 
         return response()->json([
             'status' => 'success',
