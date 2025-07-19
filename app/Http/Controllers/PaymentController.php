@@ -161,7 +161,7 @@ class PaymentController extends Controller
             $transaksi = Transaksi::where('order_id', $request->order_id)->first();
 
             if (!$transaksi) {
-                \Log::warning('Midtrans callback: transaksi tidak ditemukan', ['order_id' => $request->order_id]);
+                // \Log::warning('Midtrans callback: transaksi tidak ditemukan', ['order_id' => $request->order_id]);
                 return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
             }
 
