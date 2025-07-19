@@ -183,15 +183,15 @@ class PendaftaranController extends Controller
         // dd($pemesanan->pluck('status'));
         // dd($pemesanan->pluck('transaksi'));
         // dd($pemesanan->pluck('transaksi.qrcode'));
-        dd([
-            'allLunas' => $allLunas,
-            'transaksiDenganQr' => $transaksiDenganQr,
-            'transaksiDenganQr_id' => optional($transaksiDenganQr)->id,
-            'qrcode' => optional($transaksiDenganQr)->qrcode,
-            'status_qr_id' => optional(optional($transaksiDenganQr)->qrcode)->status_qr_id,
-            'pemesanan_status_ids' => $pemesanan->pluck('status_pemesanan_id'),
-            'pemesanan_status_nama' => $pemesanan->pluck('status.nama'),
-        ]);
+        // dd([
+        //     'allLunas' => $allLunas,
+        //     'transaksiDenganQr' => $transaksiDenganQr,
+        //     'transaksiDenganQr_id' => optional($transaksiDenganQr)->id,
+        //     'qrcode' => optional($transaksiDenganQr)->qrcode,
+        //     'status_qr_id' => optional(optional($transaksiDenganQr)->qrcode)->status_qr_id,
+        //     'pemesanan_status_ids' => $pemesanan->pluck('status_pemesanan_id'),
+        //     'pemesanan_status_nama' => $pemesanan->pluck('status.nama'),
+        // ]);
 
         return view('customer.lomba.show', compact('pemesanan', 'allLunas', 'transaksiDenganQr'));
     }
