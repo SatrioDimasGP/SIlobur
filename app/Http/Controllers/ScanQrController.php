@@ -66,7 +66,8 @@ class ScanQrController extends Controller
                 $pemesanan_awal->created_at->addMinutes(1),
             ])
             ->get();
-        dd($pemesanans);
+
+        return response()->json($pemesanans);
 
         return response()->json([
             'status' => 200,
