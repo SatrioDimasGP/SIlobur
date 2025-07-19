@@ -6,6 +6,7 @@ use App\Models\Lomba;
 use App\Models\Pemesanan;
 use App\Models\Penilaian;
 use App\Models\BlokGantangan;
+use App\Models\Burung;
 use Illuminate\Support\Facades\Auth;
 
 class LombaController extends Controller
@@ -217,26 +218,27 @@ class LombaController extends Controller
     {
         $blokGantangan = BlokGantangan::with([
             'gantangan',
-            'gantangan.pemesanan', // tambahkan ini
+            'gantangan.pemesanan',
             'gantangan.pemesanan.burung.jenisBurung',
             'gantangan.pemesanan.burung.kelas',
             'blok.lomba'
         ])->findOrFail($blokGantanganId);
 
-        // 🔍 Tambahkan debug di sini
-        dd([
-            'burung_ids_in_gantangan' => $blokGantangan->gantangan->pemesanan->pluck('burung_id'),
-            'current_burung_id' => $burungId,
-        ]);
-
-
         $penilaians = Penilaian::with(['user', 'bendera', 'tahap'])
             ->where('blok_gantangan_id', $blokGantanganId)
-            ->where('burung_id', $burungId)    // filter berdasarkan burung_id
+            ->where('burung_id', $burungId)
             ->where('tahap_id', $tahapId)
             ->get();
-        // dd($penilaians);
 
-        return view('customer.hasil_lomba.show', compact('penilaians', 'blokGantangan', 'tahapId', 'burungId'));
+        // Ambil burung langsung dari ID
+        $burung = Burung::with(['jenisBurung', 'kelas'])->find($burungId);
+
+        return view('customer.hasil_lomba.show', compact(
+            'penilaians',
+            'blokGantangan',
+            'tahapId',
+            'burungId',
+            'burung'
+        ));
     }
 }
