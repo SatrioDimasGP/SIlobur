@@ -27,7 +27,7 @@
                     <tbody>
                         @foreach ($data as $key => $item)
                             @php
-                                $burung = optional($item->burung);
+                                $burung = optional(optional($item->transaksi?->pemesanans)->burung);
                             @endphp
                             <tr>
                                 <td class="text-center">{{ $item->user->name }}</td>
@@ -36,6 +36,7 @@
                                 <td class="text-center">{{ $item->updated_at->format('d/m/Y, H.i.s') }}</td>
                             </tr>
                         @endforeach
+
                     </tbody>
                 </table>
             </div>
