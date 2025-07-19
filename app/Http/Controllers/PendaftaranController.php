@@ -171,26 +171,15 @@ class PendaftaranController extends Controller
             abort(404);
         }
 
-        $allLunas = $pemesanan->every(fn($p) => $p->status_pemesanan_id == 2);
+        $allLunas = $pemesanan->pluck('status.nama')->every(fn($s) => strtolower($s) === 'lunas');
 
         $transaksiDenganQr = $pemesanan
             ->filter(
                 fn($p) =>
-                $p->status_pemesanan_id == 2 &&
-                    $p->transaksi &&
-                    $p->transaksi->qrcode
+                $p->transaksi && $p->transaksi->qrcode
             )
             ->pluck('transaksi')
             ->first();
-        // dd([
-        //     'semua_pemesanan' => $pemesanan,
-        //     'transaksi_setiap_pemesanan' => $pemesanan->map(fn($p) => $p->transaksi),
-        //     'status_setiap_pemesanan' => $pemesanan->pluck('status_pemesanan_id'),
-        //     'qr_code_yang_terbaca' => $pemesanan
-        //         ->filter(fn($p) => $p->status_pemesanan_id == 2 && optional($p->transaksi)->qrcode)
-        //         ->pluck('transaksi')
-        // ]);
-
         // dd($pemesanan->pluck('status'));
         // dd($pemesanan->pluck('transaksi'));
         // dd($pemesanan->pluck('transaksi.qrcode'));
