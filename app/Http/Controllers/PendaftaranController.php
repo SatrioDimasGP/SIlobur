@@ -176,7 +176,9 @@ class PendaftaranController extends Controller
         $transaksiDenganQr = $pemesanan
             ->filter(
                 fn($p) =>
-                $p->transaksi && $p->transaksi->qrcode
+                $p->status_pemesanan_id == 2 &&
+                    $p->transaksi &&
+                    $p->transaksi->qrcode
             )
             ->pluck('transaksi')
             ->first();
