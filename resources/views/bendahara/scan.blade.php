@@ -151,9 +151,8 @@
 
                         table.row.add([
                             item.user.name,
-                            (item.transaksi?.pemesanans?.[0]?.burung?.jenis_burung?.nama ?? '-'),
-                            (item.transaksi?.pemesanans?.[0]?.burung?.kelas?.nama ?? '-'),
-
+                            item.transaksi?.pemesanan?.burung?.jenis_burung?.nama ?? '-',
+                            item.transaksi?.pemesanan?.burung?.kelas?.nama ?? '-',
                             formattedDate
                         ]).draw();
                     });
