@@ -164,7 +164,7 @@ class PendaftaranController extends Controller
         //     'transaksi' => $pemesanan->map(fn($p) => $p->transaksi)->all(),
         //     'qrcode' => $pemesanan->map(fn($p) => optional($p->transaksi)->qrcode)->all(),
         // ]);
-        dd($pemesanan);
+        // dd($pemesanan);
 
 
         if ($pemesanan->isEmpty()) {
