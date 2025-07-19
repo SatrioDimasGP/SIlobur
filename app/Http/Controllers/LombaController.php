@@ -223,6 +223,13 @@ class LombaController extends Controller
             'blok.lomba'
         ])->findOrFail($blokGantanganId);
 
+        // 🔍 Tambahkan debug di sini
+        dd([
+            'burung_ids_in_gantangan' => $blokGantangan->gantangan->pemesanan->pluck('burung_id'),
+            'current_burung_id' => $burungId,
+        ]);
+
+
         $penilaians = Penilaian::with(['user', 'bendera', 'tahap'])
             ->where('blok_gantangan_id', $blokGantanganId)
             ->where('burung_id', $burungId)    // filter berdasarkan burung_id
