@@ -71,13 +71,17 @@ class ScanQrController extends Controller
 
 
         return response()->json([
+
             'status' => 200,
+
             'message' => 'Berhasil scan',
+
             'data' => RefQrcode::with([
                 'user',
                 'transaksi.pemesanans.burung.jenisBurung',
                 'transaksi.pemesanans.burung.kelas'
-            ])->where('id', $qr_id)->get()
+            ])->where('status_qr_id', 2)->get()
+
         ]);
     }
 }
