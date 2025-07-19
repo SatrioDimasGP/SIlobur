@@ -62,8 +62,8 @@ class ScanQrController extends Controller
         $pemesanans = Pemesanan::with(['burung.jenisBurung', 'burung.kelas', 'user'])
             ->where('user_id', $pemesanan_awal->user_id)
             ->whereBetween('created_at', [
-                $pemesanan_awal->created_at->subSeconds(30),
-                $pemesanan_awal->created_at->subSeconds(30),
+                $pemesanan_awal->created_at->subMinutes(1),
+                $pemesanan_awal->created_at->addMinutes(1),
             ])
             ->get();
 
