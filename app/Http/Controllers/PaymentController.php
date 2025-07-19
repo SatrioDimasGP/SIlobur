@@ -153,94 +153,78 @@ class PaymentController extends Controller
 
     public function callback(Request $request)
     {
-        // \Log::info('Midtrans callback received', $request->all());
-        // \Log::info('Callback Midtrans Masuk', $request->all());
-
         $serverKey = config('midtrans.MIDTRANS_SERVER_KEY');
         $hashedKey = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
-        // \Log::info('Midtrans callback signature check', [
-        //     'hashedKey' => $hashedKey,
-        //     'signature_key' => $request->signature_key,
-        // ]);
 
-        //if ($hashedKey == $request->signature_key) {
-        if ($request->transaction_status == 'capture' || $request->transaction_status == 'settlement') {
+        // Cek apakah signature key valid
+        if ($hashedKey === $request->signature_key) {
             $transaksi = Transaksi::where('order_id', $request->order_id)->first();
+
             if (!$transaksi) {
-                // \Log::warning('Midtrans callback: transaksi tidak ditemukan', ['order_id' => $request->order_id]);
-                return 0;
+                \Log::warning('Midtrans callback: transaksi tidak ditemukan', ['order_id' => $request->order_id]);
+                return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
             }
 
-            $transaksi->update(['status_transaksi_id' => 2]);
+            // Jika pembayaran berhasil
+            if ($request->transaction_status === 'capture' || $request->transaction_status === 'settlement') {
+                $transaksi->update(['status_transaksi_id' => 2]);
 
-            preg_match('/silobur.{10}(.*)/', $transaksi->order_id, $matches);
-            $pemesananIds = isset($matches[1]) ? explode('-', $matches[1]) : [$transaksi->pemesanan_id];
+                preg_match('/silobur.{10}(.*)/', $transaksi->order_id, $matches);
+                $pemesananIds = isset($matches[1]) ? explode('-', $matches[1]) : [$transaksi->pemesanan_id];
 
-            // \Log::info('Midtrans callback: parsing pemesananIds', [
-            //     'order_id' => $transaksi->order_id,
-            //     'pemesananIds' => $pemesananIds,
-            // ]);
+                $userId = null;
 
-            $userId = null;
-
-            foreach ($pemesananIds as $id) {
-                $pemesanan = Pemesanan::find($id);
-                if ($pemesanan && $pemesanan->status_pemesanan_id != 2) {
-                    $pemesanan->update(['status_pemesanan_id' => 2]);
-                    $userId = $pemesanan->user_id;
-                } else {
-                    // \Log::warning('Midtrans callback: pemesanan tidak ditemukan atau sudah berhasil', ['pemesanan_id' => $id]);
+                foreach ($pemesananIds as $id) {
+                    $pemesanan = Pemesanan::find($id);
+                    if ($pemesanan && $pemesanan->status_pemesanan_id != 2) {
+                        $pemesanan->update(['status_pemesanan_id' => 2]);
+                        $userId = $pemesanan->user_id;
+                    }
                 }
+
+                // Generate QR code
+                $ref_qrcode = new RefQrcode();
+                $ref_qrcode->user_id = $userId ?? auth::id();
+                $ref_qrcode->status_qr_id = 1;
+                $ref_qrcode->transaksi_id = $transaksi->id;
+                $ref_qrcode->save();
+
+                $ref_qrcode->file_qrcode = $ref_qrcode->id . ".svg";
+                $ref_qrcode->save();
+
+                $path_file = 'qr_code/' . $ref_qrcode->file_qrcode;
+                $file_qr = QrCode::size(200)
+                    ->format('svg')
+                    ->generate($ref_qrcode->id);
+                Storage::disk('public')->put($path_file, $file_qr);
+
+                $path_png = 'qr_code/' . $ref_qrcode->id . '.png';
+                $file_qr_png = QrCode::format('png')->size(200)->generate($ref_qrcode->id);
+                Storage::disk('public')->put($path_png, $file_qr_png);
+
+                return response()->json(['message' => 'Berhasil diproses'], 200);
             }
 
-            // Generate QR code
-            $ref_qrcode = new RefQrcode();
-            $ref_qrcode->user_id = $userId ?? auth::id();
-            $ref_qrcode->status_qr_id = 1;
-            $ref_qrcode->transaksi_id = $transaksi->id;
-            $ref_qrcode->save();
+            // Jika expired
+            if ($request->transaction_status === 'expire') {
+                $transaksiLain = Transaksi::where('pemesanan_id', $transaksi->pemesanan_id)
+                    ->where('status_transaksi_id', 2)
+                    ->get();
 
-            $ref_qrcode->file_qrcode = $ref_qrcode->id . ".svg";
-            $ref_qrcode->save();
+                if ($transaksiLain->isEmpty()) {
+                    Pemesanan::where('id', $transaksi->pemesanan_id)->delete();
+                    return response()->json(['message' => 'Data pemesanan dihapus'], 200);
+                }
 
-            $path_file = 'qr_code/' . $ref_qrcode->file_qrcode;
-            $file_qr = QrCode::size(200)
-                ->format('svg')
-                ->generate($ref_qrcode->id);
-            Storage::disk('public')->put($path_file, $file_qr);
-
-            // Simpan juga versi PNG untuk PDF
-            $path_png = 'qr_code/' . $ref_qrcode->id . '.png';
-            $file_qr_png = QrCode::format('png')->size(200)->generate($ref_qrcode->id);
-            Storage::disk('public')->put($path_png, $file_qr_png);
-            if (!Storage::disk('public')->exists($path_png)) {
-                Log::error("Gagal menyimpan PNG QRCode: " . $path_png);
+                return response()->json(['message' => 'Transaksi expired, tetapi ada transaksi lain yang sukses'], 200);
             }
 
-            return 2;
-        }
-        if ($request->transaction_status == 'expire') {
-            $transaksi = Transaksi::where('order_id', $request->order_id)->first();
-            $transaksiLain = Transaksi::where('pemesanan_id', $transaksi->pemesanan_id)
-                ->where('status_transaksi_id', 2)
-                ->get();
-
-            if ($transaksiLain->isEmpty()) {
-                // Delete pemesanan
-                $pemesanan = DB::table('pemesanans')
-                    ->where('id', $transaksi->pemesanan_id)
-                    ->delete();
-
-                return "Data Pemesanan berhasil dihapus";
-            }
-            return 3;
+            return response()->json(['message' => 'Status transaksi tidak ditangani'], 200);
         }
 
-        //return 1;
-        //}
-
-        return 0;
+        return response()->json(['message' => 'Signature tidak valid'], 403);
     }
+
 
     public function cekStatusQr($id)
     {
