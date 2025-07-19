@@ -25,18 +25,16 @@
                     </thead>
 
                     <tbody>
-                        @foreach ($data as $key => $item)
-                            @php
-                                $burung = optional(optional($item->transaksi?->pemesanans)->burung);
-                            @endphp
-                            <tr>
-                                <td class="text-center">{{ $item->user->name }}</td>
-                                <td class="text-center">{{ $burung->jenisBurung->nama ?? '-' }}</td>
-                                <td class="text-center">{{ $burung->kelas->nama ?? '-' }}</td>
-                                <td class="text-center">{{ $item->updated_at->format('d/m/Y, H.i.s') }}</td>
-                            </tr>
+                        @foreach ($data as $item)
+                            @foreach ($item->transaksi?->pemesanans ?? [] as $pemesanan)
+                                <tr>
+                                    <td class="text-center">{{ $item->user->name }}</td>
+                                    <td class="text-center">{{ $pemesanan->burung->jenisBurung->nama ?? '-' }}</td>
+                                    <td class="text-center">{{ $pemesanan->burung->kelas->nama ?? '-' }}</td>
+                                    <td class="text-center">{{ $item->updated_at->format('d/m/Y, H.i.s') }}</td>
+                                </tr>
+                            @endforeach
                         @endforeach
-
                     </tbody>
                 </table>
             </div>
@@ -149,14 +147,15 @@
                         const date = new Date(item.updated_at);
                         const formattedDate = date.toLocaleString();
 
-                        table.row.add([
-                            item.user.name,
-                            item.transaksi?.pemesanans?.burung?.jenis_burung?.nama ?? '-',
-                            item.transaksi?.pemesanans?.burung?.kelas?.nama ?? '-',
-                            formattedDate
-                        ]).draw();
+                        (item.transaksi?.pemesanans ?? []).forEach(pemesanan => {
+                            table.row.add([
+                                item.user.name,
+                                pemesanan.burung?.jenis_burung?.nama ?? '-',
+                                pemesanan.burung?.kelas?.nama ?? '-',
+                                formattedDate
+                            ]).draw();
+                        });
                     });
-
                 } else {
                     var notyf = new Notyf();
                     notyf.error('QRCode tidak ditemukan!');
