@@ -40,6 +40,11 @@ class PaymentController extends Controller
         }
 
         $pemesanans = Pemesanan::with('burung.kelas')->whereIn('id', $pemesananIds)->get();
+
+
+        if ($pemesanans->isEmpty()) {
+            return redirect()->back()->withErrors('Data pemesanan tidak ditemukan.');
+        }
         // Cek apakah sudah ada transaksi belum lunas untuk salah satu pemesanan
         $transaksiEksisting = Transaksi::whereIn('pemesanan_id', $pemesananIds)
             ->where('status_transaksi_id', 1) // Status 1 = belum lunas
@@ -50,11 +55,6 @@ class PaymentController extends Controller
             return redirect()->route('pembayaran.index', $transaksiEksisting->id)
                 ->with('info', 'Transaksi sudah dibuat. Silakan selesaikan pembayaran terlebih dahulu.');
         }
-
-        if ($pemesanans->isEmpty()) {
-            return redirect()->back()->withErrors('Data pemesanan tidak ditemukan.');
-        }
-
         $totalHarga = 0;
 
         foreach ($pemesanans as $pemesanan) {
