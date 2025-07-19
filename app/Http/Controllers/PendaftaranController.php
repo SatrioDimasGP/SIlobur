@@ -182,14 +182,14 @@ class PendaftaranController extends Controller
             )
             ->pluck('transaksi')
             ->first();
-        dd([
-            'semua_pemesanan' => $pemesanan,
-            'transaksi_setiap_pemesanan' => $pemesanan->map(fn($p) => $p->transaksi),
-            'status_setiap_pemesanan' => $pemesanan->pluck('status_pemesanan_id'),
-            'qr_code_yang_terbaca' => $pemesanan
-                ->filter(fn($p) => $p->status_pemesanan_id == 2 && optional($p->transaksi)->qrcode)
-                ->pluck('transaksi')
-        ]);
+        // dd([
+        //     'semua_pemesanan' => $pemesanan,
+        //     'transaksi_setiap_pemesanan' => $pemesanan->map(fn($p) => $p->transaksi),
+        //     'status_setiap_pemesanan' => $pemesanan->pluck('status_pemesanan_id'),
+        //     'qr_code_yang_terbaca' => $pemesanan
+        //         ->filter(fn($p) => $p->status_pemesanan_id == 2 && optional($p->transaksi)->qrcode)
+        //         ->pluck('transaksi')
+        // ]);
 
         // dd($pemesanan->pluck('status'));
         // dd($pemesanan->pluck('transaksi'));
