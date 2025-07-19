@@ -25,16 +25,18 @@
                     </thead>
 
                     <tbody>
-                        @foreach ($data as $item)
-                            @foreach ($item->transaksi->pemesanans as $pemesanan)
-                                <tr>
-                                    <td class="text-center">{{ $item->user->name }}</td>
-                                    <td class="text-center">{{ $pemesanan->burung->jenisBurung->nama ?? '-' }}</td>
-                                    <td class="text-center">{{ $pemesanan->burung->kelas->nama ?? '-' }}</td>
-                                    <td class="text-center">{{ $item->updated_at->format('d/m/Y, H.i.s') }}</td>
-                                </tr>
-                            @endforeach
+                        @foreach ($data as $key => $item)
+                            @php
+                                $burung = optional(optional($item->transaksi?->pemesanans)->burung);
+                            @endphp
+                            <tr>
+                                <td class="text-center">{{ $item->user->name }}</td>
+                                <td class="text-center">{{ $burung->jenisBurung->nama ?? '-' }}</td>
+                                <td class="text-center">{{ $burung->kelas->nama ?? '-' }}</td>
+                                <td class="text-center">{{ $item->updated_at->format('d/m/Y, H.i.s') }}</td>
+                            </tr>
                         @endforeach
+
                     </tbody>
                 </table>
             </div>
@@ -143,18 +145,16 @@
                     //     console.log(item);
                     // }, 2000);
                     table.clear().draw();
-                    data.data.forEach((item) => {
-                        item.transaksi?.pemesanans?.forEach((pemesanan) => {
-                            const date = new Date(item.updated_at);
-                            const formattedDate = date.toLocaleString();
+                    data.data.forEach((item, index) => {
+                        const date = new Date(item.updated_at);
+                        const formattedDate = date.toLocaleString();
 
-                            table.row.add([
-                                item.user.name,
-                                pemesanan.burung?.jenis_burung?.nama ?? '-',
-                                pemesanan.burung?.kelas?.nama ?? '-',
-                                formattedDate
-                            ]).draw();
-                        });
+                        table.row.add([
+                            item.user.name,
+                            item.transaksi?.pemesanans?.burung?.jenis_burung?.nama ?? '-',
+                            item.transaksi?.pemesanans?.burung?.kelas?.nama ?? '-',
+                            formattedDate
+                        ]).draw();
                     });
 
                 } else {
