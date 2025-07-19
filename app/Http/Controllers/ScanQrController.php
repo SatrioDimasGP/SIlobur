@@ -20,22 +20,22 @@ class ScanQrController extends Controller
     public function index()
 
     {
-//         $data = RefQrcode::with([
-//     'transaksi.pemesanans.burung.jenisBurung',
-//     'transaksi.pemesanans.burung.kelas'
-// ])->where('status_qr_id', 2)->first();
+        //         $data = RefQrcode::with([
+        //     'transaksi.pemesanans.burung.jenisBurung',
+        //     'transaksi.pemesanans.burung.kelas'
+        // ])->where('status_qr_id', 2)->first();
 
-// dd($data->transaksi?->pemesanans?->burung?->jenisBurung?->nama);
+        // dd($data->transaksi?->pemesanans?->burung?->jenisBurung?->nama);
 
 
         $data = RefQrcode::with([
-    'user',
-    'status_qr',
-    'transaksi.pemesanans.burung.jenisBurung',
-    'transaksi.pemesanans.burung.kelas'
-])->where('status_qr_id', 2)->get();
+            'user',
+            'status_qr',
+            'transaksi.pemesanans.burung.jenisBurung',
+            'transaksi.pemesanans.burung.kelas'
+        ])->where('status_qr_id', 2)->get();
 
-// dd ($data);
+        // dd ($data);
 
         // return $data;
 
@@ -77,10 +77,10 @@ class ScanQrController extends Controller
             'message' => 'Berhasil scan',
 
             'data' => RefQrcode::with([
-    'user',
-    'transaksi.pemesanans.burung.jenisBurung',
-    'transaksi.pemesanans.burung.kelas'
-])->where('status_qr_id', 2)->get()
+                'user',
+                'transaksi.pemesanans.burung.jenisBurung',
+                'transaksi.pemesanans.burung.kelas'
+            ])->where('status_qr_id', 2)->get()
 
         ]);
     }
