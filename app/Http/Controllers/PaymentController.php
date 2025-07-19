@@ -40,6 +40,16 @@ class PaymentController extends Controller
         }
 
         $pemesanans = Pemesanan::with('burung.kelas')->whereIn('id', $pemesananIds)->get();
+        // Cek apakah sudah ada transaksi belum lunas untuk salah satu pemesanan
+        $transaksiEksisting = Transaksi::whereIn('pemesanan_id', $pemesananIds)
+            ->where('status_transaksi_id', 1) // Status 1 = belum lunas
+            ->orderByDesc('created_at')
+            ->first();
+
+        if ($transaksiEksisting) {
+            return redirect()->route('pembayaran.index', $transaksiEksisting->id)
+                ->with('info', 'Transaksi sudah dibuat. Silakan selesaikan pembayaran terlebih dahulu.');
+        }
 
         if ($pemesanans->isEmpty()) {
             return redirect()->back()->withErrors('Data pemesanan tidak ditemukan.');
