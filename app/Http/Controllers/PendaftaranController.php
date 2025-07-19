@@ -171,7 +171,7 @@ class PendaftaranController extends Controller
             abort(404);
         }
 
-        $allLunas = $pemesanan->pluck('status.nama')->every(fn($s) => strtolower($s) === 'lunas');
+        $allLunas = $pemesanan->every(fn($p) => $p->status_pemesanan_id == 2);
 
         $transaksiDenganQr = $pemesanan
             ->filter(
