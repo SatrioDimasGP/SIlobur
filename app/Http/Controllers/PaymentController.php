@@ -129,37 +129,39 @@ class PaymentController extends Controller
 
         $refQrcode = $transaksi->refQrcode;
 
-        if ($refQrcode) {
-            $pathSvg = 'qr_code/' . $refQrcode->file_qrcode; // file_qrcode adalah SVG
-            $pathPng = 'qr_code/' . $refQrcode->id . '.png'; // PNG versi untuk PDF
-
-            // Cek apakah kedua file QR ada di storage/public
-            $hasSvg = Storage::disk('public')->exists($pathSvg);
-            $hasPng = Storage::disk('public')->exists($pathPng);
-
-            if ($hasSvg && $hasPng) {
-                // Ambil isi SVG untuk tampilan web (jika ingin ditampilkan di view web)
-                $qrcodeSvg = Storage::disk('public')->get($pathSvg);
-
-                // Ambil path lokal absolut untuk PNG agar bisa dibaca oleh DomPDF
-                $qrcodePath = storage_path('app/public/' . $pathPng);
-
-                $pdf = Pdf::loadView('pdf.bukti_pembayaran', [
-                    'transaksi' => $transaksi,
-                    'qrcodeSvg' => $qrcodeSvg,
-                    'qrcodePath' => $qrcodePath, // Path lokal PNG untuk dipakai di <img src="">
-                ]);
-
-                return $pdf->download('bukti-pembayaran-' . $transaksi->order_id . '.pdf');
-            }
+        // Tambahkan pengecekan apakah QRCode sudah tersedia
+        if (!$refQrcode) {
+            return redirect()->route('lomba.saya')->with([
+                'info' => 'Pembayaran berhasil. QR Code sedang diproses, silakan cek beberapa saat lagi.',
+                'transaksi_id' => $transaksi->id,
+            ]);
         }
 
-        // Jika QR tidak ditemukan, redirect kembali
+        $pathSvg = 'qr_code/' . $refQrcode->file_qrcode;
+        $pathPng = 'qr_code/' . $refQrcode->id . '.png';
+
+        $hasSvg = Storage::disk('public')->exists($pathSvg);
+        $hasPng = Storage::disk('public')->exists($pathPng);
+
+        if ($hasSvg && $hasPng) {
+            $qrcodeSvg = Storage::disk('public')->get($pathSvg);
+            $qrcodePath = storage_path('app/public/' . $pathPng);
+
+            $pdf = Pdf::loadView('pdf.bukti_pembayaran', [
+                'transaksi' => $transaksi,
+                'qrcodeSvg' => $qrcodeSvg,
+                'qrcodePath' => $qrcodePath,
+            ]);
+
+            return $pdf->download('bukti-pembayaran-' . $transaksi->order_id . '.pdf');
+        }
+
         return redirect()->route('lomba.saya')->with([
-            'download_pdf' => true,
+            'info' => 'Pembayaran berhasil. QR Code sedang diproses, silakan cek beberapa saat lagi.',
             'transaksi_id' => $transaksi->id,
         ]);
     }
+
 
     public function callback(Request $request)
     {
