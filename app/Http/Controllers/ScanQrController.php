@@ -17,29 +17,34 @@ class ScanQrController extends Controller
 {
 
     public function index()
-
     {
-        //         $data = RefQrcode::with([
-        //     'transaksi.pemesanans.burung.jenisBurung',
-        //     'transaksi.pemesanans.burung.kelas'
-        // ])->where('status_qr_id', 2)->first();
+        $ref_qrs = RefQrcode::with('transaksi')->where('status_qr_id', 2)->get();
 
-        // dd($data->transaksi?->pemesanans?->burung?->jenisBurung?->nama);
+        $allPemesanan = collect();
 
+        foreach ($ref_qrs as $ref_qr) {
+            $transaksi = $ref_qr->transaksi;
+            if (!$transaksi) continue;
 
-        $data = RefQrcode::with([
-            'user',
-            'status_qr',
-            'transaksi.pemesanans.burung.jenisBurung',
-            'transaksi.pemesanans.burung.kelas'
-        ])->where('status_qr_id', 2)->get();
+            $pemesanan_awal = Pemesanan::find($transaksi->pemesanan_id);
+            if (!$pemesanan_awal) continue;
 
-        // dd ($data);
+            $pemesanans = Pemesanan::with(['burung.jenisBurung', 'burung.kelas', 'user'])
+                ->where('user_id', $pemesanan_awal->user_id)
+                ->whereBetween('created_at', [
+                    $pemesanan_awal->created_at->subMinutes(1),
+                    $pemesanan_awal->created_at->addMinutes(1),
+                ])
+                ->get();
 
-        // return $data;
+            $allPemesanan = $allPemesanan->merge($pemesanans);
+        }
 
-        return view('bendahara.scan', compact('data'));
+        return view('bendahara.scan', [
+            'data' => $allPemesanan
+        ]);
     }
+
 
 
     public function show($qr_id)
