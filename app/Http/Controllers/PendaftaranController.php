@@ -164,6 +164,7 @@ class PendaftaranController extends Controller
         //     'transaksi' => $pemesanan->map(fn($p) => $p->transaksi)->all(),
         //     'qrcode' => $pemesanan->map(fn($p) => optional($p->transaksi)->qrcode)->all(),
         // ]);
+        dd($pemesanan);
 
 
         if ($pemesanan->isEmpty()) {
@@ -179,7 +180,6 @@ class PendaftaranController extends Controller
             )
             ->pluck('transaksi')
             ->first();
-
         // dd($pemesanan->pluck('status'));
         // dd($pemesanan->pluck('transaksi'));
         // dd($pemesanan->pluck('transaksi.qrcode'));
