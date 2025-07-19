@@ -143,7 +143,7 @@
                 .then(data => {
                     daftarGantangan.innerHTML = '';
 
-                    // ✅ Tampilkan box dan pesan jika kosong
+                    // Tampilkan box dan pesan jika kosong
                     if (data.gantangans.length === 0) {
                         pilihanGantangan.style.display = 'block';
                         daftarGantangan.innerHTML =
@@ -151,7 +151,7 @@
                         return;
                     }
 
-                    // ✅ Jika ada gantangan, proses dan tampilkan seperti biasa
+                    // Jika ada gantangan, proses dan tampilkan seperti biasa
                     pilihanGantangan.style.display = 'block';
                     data.gantangans.sort((a, b) => a.nomor - b.nomor);
 
