@@ -67,8 +67,6 @@ class ScanQrController extends Controller
             ])
             ->get();
 
-        return response()->json($pemesanans);
-
         return response()->json([
             'status' => 200,
             'message' => 'Berhasil scan',
