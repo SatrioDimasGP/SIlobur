@@ -145,19 +145,18 @@
                     //     console.log(item);
                     // }, 2000);
                     table.clear().draw();
-                    data.data.forEach((item) => {
+                    data.data.forEach((item, index) => {
                         const date = new Date(item.updated_at);
                         const formattedDate = date.toLocaleString();
 
-                        item.transaksi?.pemesanans?.forEach(pemesanan => {
-                            table.row.add([
-                                item.user.name,
-                                pemesanan.burung?.jenis_burung?.nama ?? '-',
-                                pemesanan.burung?.kelas?.nama ?? '-',
-                                formattedDate
-                            ]).draw();
-                        });
+                        table.row.add([
+                            item.user.name,
+                            item.transaksi?.pemesanan?.burung?.jenis_burung?.nama ?? '-',
+                            item.transaksi?.pemesanan?.burung?.kelas?.nama ?? '-',
+                            formattedDate
+                        ]).draw();
                     });
+
                 } else {
                     var notyf = new Notyf();
                     notyf.error('QRCode tidak ditemukan!');
