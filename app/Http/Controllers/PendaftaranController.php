@@ -105,7 +105,9 @@ class PendaftaranController extends Controller
 
         DB::beginTransaction();
         try {
-            foreach ($request->items as $item) {
+            $firstPemesanan = null;
+
+            foreach ($request->items as $index => $item) {
                 $burung = Burung::where('jenis_burung_id', $item['jenis_id'])
                     ->where('kelas_id', $item['kelas_id'])
                     ->first();
@@ -124,7 +126,7 @@ class PendaftaranController extends Controller
                     return back()->with('error', 'Gantangan ' . $item['gantangan_id'] . ' sudah terdaftar untuk burung ini.');
                 }
 
-                Pemesanan::create([
+                $pemesanan = Pemesanan::create([
                     'user_id' => Auth::id(),
                     'lomba_id' => $lomba->id,
                     'gantangan_id' => $item['gantangan_id'],
@@ -134,9 +136,18 @@ class PendaftaranController extends Controller
                     'created_by' => Auth::id(),
                     'updated_by' => Auth::id(),
                 ]);
+
+                // Ambil created_at dari pemesanan pertama
+                if ($index === 0) {
+                    $firstPemesanan = $pemesanan;
+                }
             }
+
             DB::commit();
-            return redirect()->route('lomba.saya')->with('success', 'Pendaftaran berhasil.');
+
+            return redirect()->route('pemesanans.show', [
+                'created_at' => $firstPemesanan->created_at->format('Y-m-d H:i:s')
+            ])->with('success', 'Pendaftaran berhasil.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
