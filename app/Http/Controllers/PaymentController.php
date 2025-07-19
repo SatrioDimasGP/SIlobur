@@ -163,28 +163,6 @@ class PaymentController extends Controller
         //     'signature_key' => $request->signature_key,
         // ]);
 
-        if ($request->transaction_status == 'pending') {
-            $transaksi = Transaksi::where('order_id', $request->order_id)->first();
-            if (!$transaksi) {
-                return 0;
-            }
-
-            $transaksi->update(['status_transaksi_id' => 1]); // anggap 1 = pending
-
-            preg_match('/silobur.{10}(.*)/', $transaksi->order_id, $matches);
-            $pemesananIds = isset($matches[1]) ? explode('-', $matches[1]) : [$transaksi->pemesanan_id];
-
-            foreach ($pemesananIds as $id) {
-                $pemesanan = Pemesanan::find($id);
-                if ($pemesanan && $pemesanan->status_pemesanan_id != 2) {
-                    $pemesanan->update(['status_pemesanan_id' => 1]); // pending
-                }
-            }
-
-            return 1; // atau kode apa pun untuk penanda sukses
-        }
-
-
         //if ($hashedKey == $request->signature_key) {
         if ($request->transaction_status == 'capture' || $request->transaction_status == 'settlement') {
             $transaksi = Transaksi::where('order_id', $request->order_id)->first();
