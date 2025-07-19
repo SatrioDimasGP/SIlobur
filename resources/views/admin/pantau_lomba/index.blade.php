@@ -49,9 +49,9 @@
                     <option value="2" {{ $tahapId == 2 ? 'selected' : '' }}>Tahap Koncer</option>
                 </select>
             </div>
-            <div class="col-md-12 text-end">
+            {{-- <div class="col-md-12 text-end">
                 <button type="submit" class="btn btn-primary">Terapkan Filter</button>
-            </div>
+            </div> --}}
         </form>
 
         {{-- Tabel --}}
