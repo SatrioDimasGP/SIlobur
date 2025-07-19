@@ -575,13 +575,24 @@ class JuriController extends Controller
             ]);
         }
 
-        $maxHijau = $rekapPenilaian->first()->total_hijau; // karena sudah diurutkan
+        $maxHijau = $rekapPenilaian->first()->total_hijau;
+
+        // Ambil semua yang memiliki hijau terbanyak
         $blokGantanganMaxHijau = $rekapPenilaian->filter(fn($item) => $item->total_hijau == $maxHijau);
 
+        // Cek apakah hanya satu burung dengan hijau terbanyak
         $blokGantanganLangsungJuara1 = null;
-        $calonKoncer = $rekapPenilaian->filter(
-            fn($item) => $item->total_hijau == ($maxHijau - 1)
-        );
+        if ($blokGantanganMaxHijau->count() === 1) {
+            $blokGantanganLangsungJuara1 = $blokGantanganMaxHijau->first()->blok_gantangan_id;
+
+            // Calon koncer: yang juga punya hijau terbanyak selain juara 1
+            $calonKoncer = $blokGantanganMaxHijau->filter(
+                fn($item) => $item->blok_gantangan_id != $blokGantanganLangsungJuara1
+            );
+        } else {
+            // Jika lebih dari 1 yang hijau terbanyak, semuanya masuk calon koncer
+            $calonKoncer = $blokGantanganMaxHijau;
+        }
 
         $minPutih = $calonKoncer->min('total_putih');
 
