@@ -149,14 +149,17 @@
                         const date = new Date(item.updated_at);
                         const formattedDate = date.toLocaleString();
 
-                        table.row.add([
-                            item.user.name,
-                            item.transaksi?.pemesanans?.burung?.jenis_burung?.nama ?? '-',
-                            item.transaksi?.pemesanans?.burung?.kelas?.nama ?? '-',
-                            formattedDate
-                        ]).draw();
-                    });
+                        const pemesanans = item.transaksi?.pemesanans ?? [];
 
+                        pemesanans.forEach(pemesanan => {
+                            table.row.add([
+                                item.user.name,
+                                pemesanan?.burung?.jenis_burung?.nama ?? '-',
+                                pemesanan?.burung?.kelas?.nama ?? '-',
+                                formattedDate
+                            ]).draw();
+                        });
+                    });
                 } else {
                     var notyf = new Notyf();
                     notyf.error('QRCode tidak ditemukan!');
