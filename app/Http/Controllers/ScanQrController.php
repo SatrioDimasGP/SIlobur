@@ -4,8 +4,7 @@
 
 namespace App\Http\Controllers;
 
-
-
+use App\Models\Pemesanan;
 use App\Models\RefQrcode;
 use App\Models\Transaksi;
 
@@ -44,44 +43,34 @@ class ScanQrController extends Controller
 
 
     public function show($qr_id)
-
     {
-
-        $ref_qr = RefQrcode::find($qr_id);
-
-
+        $ref_qr = RefQrcode::with('transaksi')->find($qr_id);
 
         if (!$ref_qr || $ref_qr->status_qr_id == 2) {
-
             return response()->json([
-
                 'status' => 400,
-
                 'message' => 'QR Code tidak ditemukan',
-
             ]);
         }
 
-
-
         $ref_qr->status_qr_id = 2;
-
         $ref_qr->save();
 
+        $transaksi = $ref_qr->transaksi;
+        $pemesanan_awal = Pemesanan::find($transaksi->pemesanan_id);
 
+        $pemesanans = Pemesanan::with(['burung.jenisBurung', 'burung.kelas', 'user'])
+            ->where('user_id', $pemesanan_awal->user_id)
+            ->whereBetween('created_at', [
+                $pemesanan_awal->created_at->subSeconds(30),
+                $pemesanan_awal->created_at->subSeconds(30),
+            ])
+            ->get();
 
         return response()->json([
-
             'status' => 200,
-
             'message' => 'Berhasil scan',
-
-            'data' => RefQrcode::with([
-                'user',
-                'transaksi.pemesanans.burung.jenisBurung',
-                'transaksi.pemesanans.burung.kelas'
-            ])->where('status_qr_id', 2)->get()
-
+            'data' => $pemesanans
         ]);
     }
 }
