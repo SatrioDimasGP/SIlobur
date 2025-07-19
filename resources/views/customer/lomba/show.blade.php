@@ -87,7 +87,7 @@
                         @foreach ($pemesanan as $pesanan)
                             <input type="hidden" name="pemesanan_ids[]" value="{{ $pesanan->id }}">
                         @endforeach
-                        <button type="submit" class="btn btn-primary">Bayar Semua</button>
+                        <button type="submit" class="btn btn-primary">Bayar Sekarang</button>
                     </form>
                     <hr>
                     <div class="alert alert-info">
