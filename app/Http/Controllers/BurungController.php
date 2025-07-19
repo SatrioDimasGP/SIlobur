@@ -161,7 +161,7 @@ class BurungController extends Controller
     {
         $lomba = Lomba::findOrFail($lomba_id);
         $jenisBurungs = JenisBurung::all();
-        $kelas = Kelas::all();
+        $kelas = Kelas::where('lomba_id', $lomba_id)->get();
 
         // Ambil kelas yang punya lomba_id sama dengan $lomba_id
         $kelasIds = Kelas::where('lomba_id', $lomba_id)->pluck('id')->toArray();
