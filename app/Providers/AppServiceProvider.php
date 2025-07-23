@@ -29,10 +29,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // // Handle offline database
-        // if (config('app.env') === 'local') {
-        //     URL::forceScheme('https');
-        // }
+        // Handle offline database
+        if (config('app.env') === 'local') {
+            URL::forceScheme('https');
+        }
         //Use bootstrap 4 for pagination css
         Paginator::useBootstrapFour();
     }

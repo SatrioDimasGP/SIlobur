@@ -71,10 +71,11 @@
                                             {{ ucfirst($statusNama ?: '-') }}
                                         </span>
                                     </td>
-
                                     <td>
-                                        <a href="{{ route('pemesanans.show', ['created_at' => $createdAt]) }}"
-                                            class="btn btn-sm btn-primary">Lihat Detail</a>
+                                        <a href="{{ route('pemesanans.show', $first->order_group_id) }}"
+                                            class="btn btn-sm btn-primary">
+                                            Lihat Detail
+                                        </a>
                                     </td>
                                 </tr>
                             @endforeach

@@ -8,10 +8,13 @@ use App\Models\Kelas;
 use App\Models\Gantangan;
 use App\Models\Pemesanan;
 use App\Models\Burung;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class PendaftaranController extends Controller
 {
@@ -90,8 +93,6 @@ class PendaftaranController extends Controller
             'kelas' => $kelas,
         ]);
     }
-
-
     // Simpan pendaftaran
     public function store(Request $request, Lomba $lomba)
     {
@@ -105,9 +106,9 @@ class PendaftaranController extends Controller
 
         DB::beginTransaction();
         try {
-            $firstPemesanan = null;
+            $orderGroupId = (string) Str::uuid();
 
-            foreach ($request->items as $index => $item) {
+            foreach ($request->items as $item) {
                 $burung = Burung::where('jenis_burung_id', $item['jenis_id'])
                     ->where('kelas_id', $item['kelas_id'])
                     ->first();
@@ -126,75 +127,60 @@ class PendaftaranController extends Controller
                     return back()->with('error', 'Gantangan ' . $item['gantangan_id'] . ' sudah terdaftar untuk burung ini.');
                 }
 
-                $pemesanan = Pemesanan::create([
+                Pemesanan::create([
                     'user_id' => Auth::id(),
                     'lomba_id' => $lomba->id,
+                    'order_group_id' => $orderGroupId,
                     'gantangan_id' => $item['gantangan_id'],
                     'burung_id' => $burung->id,
                     'nama' => $request->nama,
-                    'status_pemesanan_id' => 1,
+                    'status_pemesanan_id' => 1, // Menunggu bayar atau langsung daftar
                     'created_by' => Auth::id(),
                     'updated_by' => Auth::id(),
                 ]);
-
-                // Ambil created_at dari pemesanan pertama
-                if ($index === 0) {
-                    $firstPemesanan = $pemesanan;
-                }
             }
 
             DB::commit();
 
-            return redirect()->route('pemesanans.show', [
-                'created_at' => $firstPemesanan->created_at->format('Y-m-d H:i:s')
-            ])->with('success', 'Pendaftaran berhasil.');
+            return redirect()->route('pemesanans.show', $orderGroupId)
+                ->with('success', 'Pendaftaran berhasil.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    public function show($created_at)
+
+    public function show($orderGroupId)
     {
         $userId = Auth::id();
-        $createdAt = Carbon::createFromFormat('Y-m-d H:i:s', $created_at);
+        Log::info("Masuk ke show(), user ID: $userId, group ID: $orderGroupId");
 
-        $pemesanan = Pemesanan::with([
+        $pemesanans = Pemesanan::with([
             'lomba',
             'gantangan',
             'burung.jenisBurung',
             'burung.kelas',
             'status',
-            'transaksi.qrcode'
+            'transaksis.qrcode',
         ])
             ->where('user_id', $userId)
-            ->where('created_at', $createdAt)
+            ->where('order_group_id', $orderGroupId)
             ->get();
-        // dd($pemesanan);
-        // dd([
-        //     'transaksi' => $pemesanan->map(fn($p) => $p->transaksi)->all(),
-        //     'qrcode' => $pemesanan->map(fn($p) => optional($p->transaksi)->qrcode)->all(),
-        // ]);
-        // dd($pemesanan);
 
-
-        if ($pemesanan->isEmpty()) {
-            abort(404);
+        if ($pemesanans->isEmpty()) {
+            abort(404, 'Pemesanan tidak ditemukan.');
         }
 
-        $allLunas = $pemesanan->pluck('status.nama')->every(fn($s) => strtolower($s) === 'lunas');
+        $allLunas = $pemesanans->pluck('status.nama')->every(fn($s) => strtolower($s) === 'lunas');
 
-        $transaksiDenganQr = $pemesanan
-            ->filter(
-                fn($p) =>
-                $p->transaksi && $p->transaksi->qrcode
-            )
-            ->pluck('transaksi')
-            ->first();
-        // dd($pemesanan->pluck('status'));
-        // dd($pemesanan->pluck('transaksi'));
-        // dd($pemesanan->pluck('transaksi.qrcode'));
+        // Ambil transaksi pertama yg terkait
+        $transaksi = optional($pemesanans->first())->transaksis->first();
 
-        return view('customer.lomba.show', compact('pemesanan', 'allLunas', 'transaksiDenganQr'));
+        $transaksiDenganQr = $transaksi && $transaksi->status_transaksi_id == 2 && $transaksi->qrcode
+            ? $transaksi
+            : null;
+
+        return view('customer.lomba.show', compact('pemesanans', 'allLunas', 'transaksiDenganQr'));
     }
 }

@@ -377,7 +377,8 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::post('/daftar/{lomba}', [PendaftaranController::class, 'store'])->name('daftar.store');
     Route::get('/lomba/{lomba}/daftar', [PendaftaranController::class, 'create'])->name('lomba.daftar');
     Route::post('lomba/{lomba}/daftar', [PendaftaranController::class, 'store'])->name('daftar.store');
-    Route::get('/pemesanans/show/{created_at}', [PendaftaranController::class, 'show'])->name('pemesanans.show');
+    Route::get('/pemesanans/show/{order_group_id}', [PendaftaranController::class, 'show'])
+        ->name('pemesanans.show');
     Route::get('/cek-status-qr/{id}', [PaymentController::class, 'cekStatusQr']);
     Route::get('pemesanans/{transaksi}/bukti-pembayaran', [PaymentController::class, 'generateBuktiPembayaranPdf'])->name('pemesanans.bukti-pembayaran');
 

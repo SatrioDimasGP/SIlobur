@@ -24,11 +24,16 @@ class PaymentController extends Controller
     //
     public function pembayaran($transaksiId)
     {
-        $transaksi = Transaksi::find($transaksiId);
-        $pemesanan = Pemesanan::find($transaksi->pemesanan_id);
+        $transaksi = Transaksi::with('pemesanans.burung.kelas')->findOrFail($transaksiId);
+        // Debug sementara
+        Log::info('Transaksi snap_token:', [$transaksi->snap_token]);
 
-        return view('pembayaran.index', compact('transaksi', 'pemesanan'));
+        return view('pembayaran.index', [
+            'transaksi' => $transaksi,
+            'pemesanan' => $transaksi->pemesanans, // dikembalikan dalam array
+        ]);
     }
+
 
 
     public function proccess(Request $request)
@@ -46,8 +51,10 @@ class PaymentController extends Controller
             return redirect()->back()->withErrors('Data pemesanan tidak ditemukan.');
         }
         // Cek apakah sudah ada transaksi belum lunas untuk salah satu pemesanan
-        $transaksiEksisting = Transaksi::whereIn('pemesanan_id', $pemesananIds)
-            ->where('status_transaksi_id', 1) // Status 1 = belum lunas
+        $transaksiEksisting = Transaksi::whereHas('pemesanans', function ($query) use ($pemesananIds) {
+            $query->whereIn('pemesanan_id', $pemesananIds);
+        })
+            ->where('status_transaksi_id', 1)
             ->orderByDesc('created_at')
             ->first();
 
@@ -88,12 +95,20 @@ class PaymentController extends Controller
         $orderId = 'silobur' . Str::random(10) . $encodedPemesananIds;
 
         $transaksi = Transaksi::create([
-            'pemesanan_id' => $pemesanans->first()->id,
             'tanggal_transaksi' => now(),
             'total' => $totalHarga,
             'metode_pembayaran' => 'MidTrans',
             'status_transaksi_id' => 1,
             'order_id' => $orderId,
+        ]);
+        Log::info('Callback mencari transaksi', ['order_id' => $orderId]);
+
+        // Simpan relasi ke pivot
+        $transaksi->pemesanans()->attach($pemesananIds, [
+            'created_at' => now(),
+            'updated_at' => now(),
+            'created_by' => Auth::id(),
+            'updated_by' => Auth::id(),
         ]);
 
         \Midtrans\Config::$serverKey = config('midtrans.MIDTRANS_SERVER_KEY');
@@ -119,7 +134,7 @@ class PaymentController extends Controller
     }
     public function pembayaranSukses()
     {
-        $transaksi = Transaksi::whereHas('pemesanans', function ($query) {
+        $transaksi = Transaksi::with('pemesanans')->whereHas('pemesanans', function ($query) {
             $query->where('user_id', Auth::id());
         })->latest('created_at')->first();
 
@@ -130,31 +145,26 @@ class PaymentController extends Controller
         $refQrcode = $transaksi->refQrcode;
 
         if ($refQrcode) {
-            $pathSvg = 'qr_code/' . $refQrcode->file_qrcode; // file_qrcode adalah SVG
-            $pathPng = 'qr_code/' . $refQrcode->id . '.png'; // PNG versi untuk PDF
+            $pathSvg = 'qr_code/' . $refQrcode->file_qrcode;
+            $pathPng = 'qr_code/' . $refQrcode->id . '.png';
 
-            // Cek apakah kedua file QR ada di storage/public
             $hasSvg = Storage::disk('public')->exists($pathSvg);
             $hasPng = Storage::disk('public')->exists($pathPng);
 
             if ($hasSvg && $hasPng) {
-                // Ambil isi SVG untuk tampilan web (jika ingin ditampilkan di view web)
                 $qrcodeSvg = Storage::disk('public')->get($pathSvg);
-
-                // Ambil path lokal absolut untuk PNG agar bisa dibaca oleh DomPDF
                 $qrcodePath = storage_path('app/public/' . $pathPng);
 
                 $pdf = Pdf::loadView('pdf.bukti_pembayaran', [
                     'transaksi' => $transaksi,
                     'qrcodeSvg' => $qrcodeSvg,
-                    'qrcodePath' => $qrcodePath, // Path lokal PNG untuk dipakai di <img src="">
+                    'qrcodePath' => $qrcodePath,
                 ]);
 
                 return $pdf->download('bukti-pembayaran-' . $transaksi->order_id . '.pdf');
             }
         }
 
-        // Jika QR tidak ditemukan, redirect kembali
         return redirect()->route('lomba.saya')->with([
             'download_pdf' => true,
             'transaksi_id' => $transaksi->id,
@@ -163,38 +173,35 @@ class PaymentController extends Controller
 
     public function callback(Request $request)
     {
+        Log::info('MIDTRANS CALLBACK MASUK', [
+            'request' => request()->all(),
+        ]);
+
         $serverKey = config('midtrans.MIDTRANS_SERVER_KEY');
         $hashedKey = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
 
-        // Cek apakah signature key valid
         if ($hashedKey === $request->signature_key) {
-            $transaksi = Transaksi::where('order_id', $request->order_id)->first();
+            $transaksi = Transaksi::with('pemesanans')->where('order_id', $request->order_id)->first();
 
             if (!$transaksi) {
-                // \Log::warning('Midtrans callback: transaksi tidak ditemukan', ['order_id' => $request->order_id]);
                 return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
             }
 
-            // Jika pembayaran berhasil
-            if ($request->transaction_status === 'capture' || $request->transaction_status === 'settlement') {
+            // === Jika sukses bayar ===
+            if (in_array($request->transaction_status, ['capture', 'settlement'])) {
                 $transaksi->update(['status_transaksi_id' => 2]);
-
-                preg_match('/silobur.{10}(.*)/', $transaksi->order_id, $matches);
-                $pemesananIds = isset($matches[1]) ? explode('-', $matches[1]) : [$transaksi->pemesanan_id];
-
+                Log::info('Generate QR berhasil');
                 $userId = null;
-
-                foreach ($pemesananIds as $id) {
-                    $pemesanan = Pemesanan::find($id);
-                    if ($pemesanan && $pemesanan->status_pemesanan_id != 2) {
+                foreach ($transaksi->pemesanans as $pemesanan) {
+                    if ($pemesanan->status_pemesanan_id != 2) {
                         $pemesanan->update(['status_pemesanan_id' => 2]);
                         $userId = $pemesanan->user_id;
                     }
                 }
 
-                // Generate QR code
+                // Generate QR Code
                 $ref_qrcode = new RefQrcode();
-                $ref_qrcode->user_id = $userId ?? auth::id();
+                $ref_qrcode->user_id = $userId ?? Auth::id();
                 $ref_qrcode->status_qr_id = 1;
                 $ref_qrcode->transaksi_id = $transaksi->id;
                 $ref_qrcode->save();
@@ -202,31 +209,33 @@ class PaymentController extends Controller
                 $ref_qrcode->file_qrcode = $ref_qrcode->id . ".svg";
                 $ref_qrcode->save();
 
-                $path_file = 'qr_code/' . $ref_qrcode->file_qrcode;
-                $file_qr = QrCode::size(200)
-                    ->format('svg')
-                    ->generate($ref_qrcode->id);
-                Storage::disk('public')->put($path_file, $file_qr);
+                $pathSvg = 'qr_code/' . $ref_qrcode->file_qrcode;
+                $pathPng = 'qr_code/' . $ref_qrcode->id . '.png';
 
-                $path_png = 'qr_code/' . $ref_qrcode->id . '.png';
-                $file_qr_png = QrCode::format('png')->size(200)->generate($ref_qrcode->id);
-                Storage::disk('public')->put($path_png, $file_qr_png);
+                $svgQr = QrCode::size(200)->format('svg')->generate($ref_qrcode->id);
+                Storage::disk('public')->put($pathSvg, $svgQr);
+
+                $pngQr = QrCode::format('png')->size(200)->generate($ref_qrcode->id);
+                Storage::disk('public')->put($pathPng, $pngQr);
 
                 return response()->json(['message' => 'Berhasil diproses'], 200);
             }
 
-            // Jika expired
+            // === Jika expired ===
             if ($request->transaction_status === 'expire') {
-                $transaksiLain = Transaksi::where('pemesanan_id', $transaksi->pemesanan_id)
-                    ->where('status_transaksi_id', 2)
-                    ->get();
+                $pemesanans = $transaksi->pemesanans;
 
-                if ($transaksiLain->isEmpty()) {
-                    Pemesanan::where('id', $transaksi->pemesanan_id)->delete();
-                    return response()->json(['message' => 'Data pemesanan dihapus'], 200);
+                foreach ($pemesanans as $pemesanan) {
+                    $hasTransaksiLain = $pemesanan->transaksis()
+                        ->where('status_transaksi_id', 2)
+                        ->exists();
+
+                    if (!$hasTransaksiLain) {
+                        $pemesanan->delete(); // Soft delete
+                    }
                 }
 
-                return response()->json(['message' => 'Transaksi expired, tetapi ada transaksi lain yang sukses'], 200);
+                return response()->json(['message' => 'Transaksi expired, data pemesanan dihapus jika tidak punya transaksi sukses lain'], 200);
             }
 
             return response()->json(['message' => 'Status transaksi tidak ditangani'], 200);
@@ -234,7 +243,6 @@ class PaymentController extends Controller
 
         return response()->json(['message' => 'Signature tidak valid'], 403);
     }
-
 
     public function cekStatusQr($id)
     {

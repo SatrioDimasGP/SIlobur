@@ -12,7 +12,6 @@ class Transaksi extends Model
     protected $table = 'transaksis';
 
     protected $fillable = [
-        'pemesanan_id', // sesuai nama tabel yang kamu pakai
         'tanggal_transaksi',
         'total',
         'metode_pembayaran',
@@ -25,8 +24,11 @@ class Transaksi extends Model
 
     public function pemesanans()
     {
-        return $this->belongsTo(Pemesanan::class, 'pemesanan_id');
+        return $this->belongsToMany(Pemesanan::class, 'pemesanan_transaksis')
+            ->withTimestamps()
+            ->withTrashed(); // jika soft delete
     }
+
 
     public function statusTransaksis()
     {

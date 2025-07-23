@@ -18,6 +18,7 @@ class Pemesanan extends Model
         'burung_id', // Tambahkan kolom baru ini
         'status_pemesanan_id',
         'lomba_id',
+        'order_group_id', // ⬅️ Tambahkan ini
         'created_by',
         'updated_by',
     ];
@@ -42,10 +43,12 @@ class Pemesanan extends Model
         return $this->belongsTo(StatusPemesanan::class, 'status_pemesanan_id');
     }
 
-    public function transaksi()
+    // Di model Pemesanan:
+    public function transaksis()
     {
-        return $this->hasOne(Transaksi::class, 'pemesanan_id');
+        return $this->belongsToMany(Transaksi::class, 'pemesanan_transaksis');
     }
+
 
     public function burung()
     {

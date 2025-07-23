@@ -18,7 +18,10 @@ class ScanQrController extends Controller
 
     public function index()
     {
-        $ref_qrs = RefQrcode::with('transaksi')->where('status_qr_id', 2)->get();
+        // Ambil semua Ref QR Code yang sudah discan
+        $ref_qrs = RefQrcode::with('transaksi.pemesanans.burung.jenisBurung', 'transaksi.pemesanans.burung.kelas', 'transaksi.pemesanans.user')
+            ->where('status_qr_id', 2)
+            ->get();
 
         $allPemesanan = collect();
 
@@ -26,17 +29,8 @@ class ScanQrController extends Controller
             $transaksi = $ref_qr->transaksi;
             if (!$transaksi) continue;
 
-            $pemesanan_awal = Pemesanan::find($transaksi->pemesanan_id);
-            if (!$pemesanan_awal) continue;
-
-            $pemesanans = Pemesanan::with(['burung.jenisBurung', 'burung.kelas', 'user'])
-                ->where('user_id', $pemesanan_awal->user_id)
-                ->whereBetween('created_at', [
-                    $pemesanan_awal->created_at->subMinutes(1),
-                    $pemesanan_awal->created_at->addMinutes(1),
-                ])
-                ->get();
-
+            // Ambil semua pemesanan dalam 1 transaksi
+            $pemesanans = $transaksi->pemesanans;
             $allPemesanan = $allPemesanan->merge($pemesanans);
         }
 
@@ -45,11 +39,9 @@ class ScanQrController extends Controller
         ]);
     }
 
-
-
     public function show($qr_id)
     {
-        $ref_qr = RefQrcode::with('transaksi')->find($qr_id);
+        $ref_qr = RefQrcode::with('transaksi.pemesanans')->find($qr_id);
 
         if (!$ref_qr || $ref_qr->status_qr_id == 2) {
             return response()->json([
@@ -62,7 +54,14 @@ class ScanQrController extends Controller
         $ref_qr->save();
 
         $transaksi = $ref_qr->transaksi;
-        $pemesanan_awal = Pemesanan::find($transaksi->pemesanan_id);
+        $pemesanan_awal = $transaksi->pemesanans->first();
+
+        if (!$pemesanan_awal) {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Pemesanan tidak ditemukan',
+            ]);
+        }
 
         $pemesanans = Pemesanan::with(['burung.jenisBurung', 'burung.kelas', 'user'])
             ->where('user_id', $pemesanan_awal->user_id)
