@@ -30,28 +30,28 @@ class Pemesanan extends Model
 
     public function gantangan()
     {
-        return $this->belongsTo(Gantangan::class);
+        return $this->belongsTo(Gantangan::class)->withTrashed();
     }
 
     public function lomba()
     {
-        return $this->belongsTo(Lomba::class);
+        return $this->belongsTo(Lomba::class)->withTrashed();
     }
 
     public function status()
     {
-        return $this->belongsTo(StatusPemesanan::class, 'status_pemesanan_id');
+        return $this->belongsTo(StatusPemesanan::class, 'status_pemesanan_id')->withTrashed();
     }
 
     // Di model Pemesanan:
     public function transaksis()
     {
-        return $this->belongsToMany(Transaksi::class, 'pemesanan_transaksis');
+        return $this->belongsToMany(Transaksi::class, 'pemesanan_transaksis')->withTrashed();
     }
 
 
     public function burung()
     {
-        return $this->belongsTo(Burung::class, 'burung_id');
+        return $this->belongsTo(Burung::class, 'burung_id')->withTrashed();
     }
 }

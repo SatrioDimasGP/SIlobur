@@ -30,31 +30,31 @@ class Penilaian extends Model
 
     public function lomba()
     {
-        return $this->belongsTo(Lomba::class);
+        return $this->belongsTo(Lomba::class)->withTrashed();
     }
 
     public function blokGantangan()
     {
-        return $this->belongsTo(BlokGantangan::class);
+        return $this->belongsTo(BlokGantangan::class)->withTrashed();
     }
 
     public function burung()
     {
-        return $this->belongsTo(Burung::class, 'burung_id');
+        return $this->belongsTo(Burung::class, 'burung_id')->withTrashed();
     }
 
     public function bendera()
     {
-        return $this->belongsTo(Bendera::class);
+        return $this->belongsTo(Bendera::class)->withTrashed();
     }
 
     public function tahap()
     {
-        return $this->belongsTo(Tahap::class);
+        return $this->belongsTo(Tahap::class)->withTrashed();
     }
 
     public function statusPenilaian()
     {
-        return $this->belongsTo(StatusPenilaian::class, 'status_penilaian_id');
+        return $this->belongsTo(StatusPenilaian::class, 'status_penilaian_id')->withTrashed();
     }
 }
