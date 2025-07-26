@@ -24,7 +24,7 @@
                 </div>
                 <div class="card-body">
                     <p>Lihat riwayat penilaian Anda pada lomba-lomba sebelumnya.</p>
-                    <a href="{{ route('penilaian-riwayat.show', auth()->id()) }}" class="btn btn-success">Lihat Riwayat</a>
+                    <a href="{{ route('penilaian-riwayat.index') }}" class="btn btn-success">Lihat Riwayat</a>
                 </div>
             </div>
 

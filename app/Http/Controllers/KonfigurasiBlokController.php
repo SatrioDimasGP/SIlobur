@@ -95,8 +95,22 @@ class KonfigurasiBlokController extends Controller
         $lombas = Lomba::all();
 
         // Ambil daftar jenis burung & kelas yang tersedia
-        $jenisBurungKelas = Burung::with(['jenisBurung', 'kelas'])->get(); // Pastikan relasi 'jenisBurung' dan 'kelas' ada
+        $jenisBurungKelas = Burung::with(['jenisBurung', 'kelas'])
+            ->whereHas('jenisBurung')
+            ->whereHas('kelas')
+            ->get();
+        // Pastikan relasi 'jenisBurung' dan 'kelas' ada
 
+        // Tambahkan debug di sini
+        // foreach ($jenisBurungKelas as $burung) {
+        //     if (!$burung->jenisBurung || !$burung->kelas) {
+        //         dd([
+        //             'burung_id' => $burung->id,
+        //             'jenisBurung' => $burung->jenisBurung,
+        //             'kelas' => $burung->kelas,
+        //         ]);
+        //     }
+        // }
         return view('korlap.konfigurasi_blok.edit_blok', compact('blok', 'lombas', 'jenisBurungKelas'));
     }
 
