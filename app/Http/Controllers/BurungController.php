@@ -333,6 +333,12 @@ class BurungController extends Controller
     public function editKelas($lomba_id, $id)
     {
         $kelas = Kelas::findOrFail($id);
+
+        // dd([
+        //     'lomba_id' => $lomba_id,
+        //     'kelas' => $kelas
+        // ]);
+
         return view('korlap.manajemen_lomba.burung.edit_kelas', compact('kelas', 'lomba_id'));
     }
 
@@ -394,6 +400,8 @@ class BurungController extends Controller
         DB::beginTransaction();
 
         try {
+            $lomba = Lomba::findOrFail($lomba_id);
+
             $request->validate([
                 'kelas' => 'required|string|max:255',
                 'harga' => 'required|integer|min:0',
@@ -411,6 +419,7 @@ class BurungController extends Controller
             $existing = Kelas::withTrashed()
                 ->whereRaw('UPPER(nama) = ?', [$nama])
                 ->where('harga', $harga)
+                ->where('lomba_id', $lomba_id)
                 ->where('id', '!=', $id)
                 ->first();
 
@@ -433,7 +442,7 @@ class BurungController extends Controller
                 }
             }
 
-            $kelas = Kelas::findOrFail($id);
+            $kelas = Kelas::where('id', $id)->where('lomba_id', $lomba_id)->firstOrFail();
 
             if ($kelas->nama === $nama && $kelas->harga == $harga) {
                 return redirect()->back()
