@@ -27,7 +27,7 @@
 @endsection
 
 @push('js')
-    <script src="{{ config('midtrans.MIDTRANS_SNAP_URL') }}" data-client-key="{{ config('midtrans.MIDTRANS_CLIENT_KEY') }}"></script>
+    <script src="{{ config('midtrans.snapUrl') }}" data-client-key="{{ config('midtrans.clientKey') }}"></script>
     <script type="text/javascript">
         document.getElementById('pay-button').onclick = function() {
             // SnapToken acquired from previous step
