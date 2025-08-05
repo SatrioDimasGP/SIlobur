@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-// use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pemesanan extends Model
 {
-    // use SoftDeletes;
+    use SoftDeletes;
 
     protected $table = 'pemesanans';
 
@@ -46,8 +46,9 @@ class Pemesanan extends Model
     // Di model Pemesanan:
     public function transaksis()
     {
-        return $this->belongsToMany(Transaksi::class, 'pemesanan_transaksis');
+        return $this->belongsToMany(Transaksi::class, 'pemesanan_transaksis')->withTrashed();
     }
+
 
     public function burung()
     {
