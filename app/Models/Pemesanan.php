@@ -46,9 +46,8 @@ class Pemesanan extends Model
     // Di model Pemesanan:
     public function transaksis()
     {
-        return $this->belongsToMany(Transaksi::class, 'pemesanan_transaksis')->withTrashed();
+        return $this->belongsToMany(Transaksi::class, 'pemesanan_transaksis');
     }
-
 
     public function burung()
     {
