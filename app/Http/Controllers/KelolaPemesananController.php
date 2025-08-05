@@ -67,4 +67,22 @@ class KelolaPemesananController extends Controller
                 ->with('error', 'Terjadi kesalahan saat memperbarui status pembayaran. Silakan coba lagi.');
         }
     }
+
+    public function destroy(Pemesanan $pemesanan)
+    {
+        DB::beginTransaction();
+
+        try {
+            $pemesanan->delete();
+
+            DB::commit();
+
+            return redirect()->route('data-pendaftaran.index')
+                ->with('success', 'Data pemesanan berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', 'Gagal menghapus data pemesanan.');
+        }
+    }
 }

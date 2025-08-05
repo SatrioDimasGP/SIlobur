@@ -87,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('scan-qr', [ScanQrController::class, 'index'])->name('scan.index');
         Route::get('scan-qr/{id}', [ScanQrController::class, 'show']);
+        Route::delete('/data-pendaftaran/{pemesanan}', [KelolaPemesananController::class, 'destroy'])->name('data-pendaftaran.destroy');
     });
 });
 
