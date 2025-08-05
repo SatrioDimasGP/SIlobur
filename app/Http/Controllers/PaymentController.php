@@ -178,7 +178,7 @@ class PaymentController extends Controller
             'request' => request()->all(),
         ]);
 
-        $serverKey = config('midtrans.MIDTRANS_SERVER_KEY');
+        $serverKey = config('midtrans.serverKey');
         $hashedKey = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
 
         if ($hashedKey === $request->signature_key) {
