@@ -73,7 +73,7 @@ class KelolaPemesananController extends Controller
         DB::beginTransaction();
 
         try {
-            $pemesanan->delete();
+            $pemesanan->forceDelete(); // ganti delete() dengan forceDelete()
 
             DB::commit();
 
