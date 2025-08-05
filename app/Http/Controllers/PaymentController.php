@@ -111,10 +111,11 @@ class PaymentController extends Controller
             'updated_by' => Auth::id(),
         ]);
 
-        \Midtrans\Config::$serverKey = config('midtrans.MIDTRANS_SERVER_KEY');
-        \Midtrans\Config::$isProduction = config('midtrans.MIDTRANS_IS_PRODUCTION');
-        \Midtrans\Config::$isSanitized = config('midtrans.MIDTRANS_IS_SANITIZED');
-        \Midtrans\Config::$is3ds = config('midtrans.MIDTRANS_IS_3DS');
+        \Midtrans\Config::$serverKey = config('midtrans.serverKey');
+        \Midtrans\Config::$clientKey = config('midtrans.clientKey');
+        \Midtrans\Config::$isProduction = config('midtrans.isProduction');
+        \Midtrans\Config::$isSanitized = config('midtrans.isSanitized');
+        \Midtrans\Config::$is3ds = config('midtrans.is3ds');
 
         $params = [
             'transaction_details' => [
