@@ -39,6 +39,7 @@
                             <th>Jenis Burung</th>
                             <th>Kelas</th>
                             <th>No Gantangan</th>
+                            <th>Harga</th> {{-- kolom baru --}}
                             <th>Status Pembayaran</th>
                             <th>Aksi</th>
                         </tr>
@@ -52,6 +53,13 @@
                                 <td>{{ $pemesanan->burung->jenisBurung->nama ?? '-' }}</td>
                                 <td>{{ $pemesanan->burung->kelas->nama ?? '-' }}</td>
                                 <td>{{ $pemesanan->gantangan->nomor ?? '-' }}</td>
+                                <td>
+                                    @if ($pemesanan->burung && $pemesanan->burung->kelas)
+                                        Rp {{ number_format($pemesanan->burung->kelas->harga, 0, ',', '.') }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td>{{ $pemesanan->status->nama }}</td>
                                 <td>
                                     <a href="{{ route('data-pendaftaran.show', $pemesanan) }}"

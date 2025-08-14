@@ -31,6 +31,13 @@
                 <p><strong>Jenis Burung:</strong> {{ $pemesanan->burung->jenisBurung->nama ?? '-' }}</p>
                 <p><strong>Kelas:</strong> {{ $pemesanan->burung->kelas->nama ?? '-' }}</p>
                 <p><strong>Gantangan:</strong> {{ $pemesanan->gantangan->nomor ?? '-' }}</p>
+                <p><strong>Harga:</strong>
+                    @if ($pemesanan->burung && $pemesanan->burung->kelas)
+                        Rp {{ number_format($pemesanan->burung->kelas->harga, 0, ',', '.') }}
+                    @else
+                        -
+                    @endif
+                </p>
                 <p><strong>Status Pembayaran:</strong> {{ $pemesanan->status->nama }}</p>
                 <p><strong>Tanggal Pemesanan:</strong> {{ $pemesanan->created_at->format('d-m-Y H:i') }}</p>
 
