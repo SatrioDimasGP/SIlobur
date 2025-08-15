@@ -120,6 +120,7 @@ class PendaftaranController extends Controller
 
                 $duplikat = Pemesanan::where('gantangan_id', $item['gantangan_id'])
                     ->where('burung_id', $burung->id)
+                    ->whereNull('deleted_at')
                     ->exists();
 
                 if ($duplikat) {
