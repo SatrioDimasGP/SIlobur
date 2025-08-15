@@ -29,7 +29,8 @@ class PendaftaranExportController extends Controller
         $sheet->setCellValue('D1', 'Jenis Burung');
         $sheet->setCellValue('E1', 'Kelas');
         $sheet->setCellValue('F1', 'No Gantangan');
-        $sheet->setCellValue('G1', 'Status Pembayaran');
+        $sheet->setCellValue('G1', 'Harga'); // kolom harga baru
+        $sheet->setCellValue('H1', 'Status Pembayaran');
 
         $row = 2;
         foreach ($pemesanans as $index => $pemesanan) {
@@ -39,9 +40,21 @@ class PendaftaranExportController extends Controller
             $sheet->setCellValue("D{$row}", $pemesanan->burung->jenisBurung->nama ?? '-');
             $sheet->setCellValue("E{$row}", $pemesanan->burung->kelas->nama ?? '-');
             $sheet->setCellValue("F{$row}", $pemesanan->gantangan->nomor ?? '-');
-            $sheet->setCellValue("G{$row}", $pemesanan->status->nama ?? '-');
+
+            // Ambil harga dari kelas burung
+            $harga = $pemesanan->burung && $pemesanan->burung->kelas
+                ? $pemesanan->burung->kelas->harga
+                : 0;
+            $sheet->setCellValue("G{$row}", $harga);
+
+            $sheet->setCellValue("H{$row}", $pemesanan->status->nama ?? '-');
             $row++;
         }
+
+        // Format angka ribuan untuk kolom harga (G2 sampai akhir)
+        $sheet->getStyle('G2:G' . ($row - 1))
+            ->getNumberFormat()
+            ->setFormatCode('#,##0');
 
         $filename = 'data_pendaftaran.xlsx';
         $writer = new Xlsx($spreadsheet);
