@@ -232,7 +232,7 @@ class PaymentController extends Controller
                         ->exists();
 
                     if (!$hasTransaksiLain) {
-                        $pemesanan->delete(); // Soft delete
+                        $pemesanan->forceDelete();
                     }
                 }
 
