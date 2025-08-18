@@ -215,7 +215,6 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Blok</th>
-                                    <th>Burung</th>
                                     <th>Gantangan</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -225,10 +224,6 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $item->blok?->nama ?? '[Blok Tidak Ditemukan]' }}</td>
-                                         <td>
-                                            {{ optional(optional($blok->burung)->jenisBurung)->nama ?? '-' }} -
-                                            {{ optional(optional($blok->burung)->kelas)->nama ?? '-' }}
-                                        </td>
                                         <td>{{ $item->gantangan?->nomor ? 'No ' . $item->gantangan->nomor : '[Gantangan Tidak Ditemukan]' }}
                                         </td>
                                         <td>
