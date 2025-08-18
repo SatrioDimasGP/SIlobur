@@ -17,34 +17,35 @@ class KonfigurasiBlokController extends Controller
     {
         $search = $request->get('search');
 
+        // Ambil hanya blok yang valid
         $bloks = Blok::with(['lomba', 'burung.jenisBurung', 'burung.kelas'])
             ->whereHas('lomba')
             ->whereHas('burung')
             ->whereHas('burung.jenisBurung')
             ->whereHas('burung.kelas')
             ->get();
+
         $lombas = Lomba::all();
         $gantangans = Gantangan::orderByRaw('CAST(nomor AS UNSIGNED)')->get();
-        // dd($bloks->pluck('burung'));
-        // dd($bloks->map(function ($blok) {
-        //     return [
-        //         'blok_id' => $blok->id,
-        //         'burung_id' => $blok->burung?->id,
-        //         'jenis_burung' => $blok->burung?->jenisBurung?->nama,
-        //         'kelas' => $blok->burung?->kelas?->nama,
-        //     ];
-        // }));
 
-        $blokGantangans = BlokGantangan::with('blok.burung.jenisBurung', 'blok.burung.kelas', 'gantangan')
+        // Ambil relasi blok-gantangan dengan pencarian
+        $blokGantangans = BlokGantangan::with(['blok.burung.jenisBurung', 'blok.burung.kelas', 'gantangan'])
             ->when($search, function ($query, $search) {
-                $query->whereHas('blok', fn($q) => $q->where('nama', 'like', "%$search%"))
-                    ->orWhereHas('gantangan', fn($q) => $q->where('nomor', 'like', "%$search%"));
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('blok', fn($qb) => $qb->where('nama', 'like', "%{$search}%"))
+                        ->orWhereHas('gantangan', fn($qb) => $qb->where('nomor', 'like', "%{$search}%"));
+                });
             })
+            // filter supaya hanya ikut blok valid juga
+            ->whereHas('blok.lomba')
+            ->whereHas('blok.burung')
+            ->whereHas('blok.burung.jenisBurung')
+            ->whereHas('blok.burung.kelas')
             ->get();
-
 
         return view('korlap.konfigurasi_blok.index', compact('bloks', 'lombas', 'gantangans', 'blokGantangans'));
     }
+
 
     public function store(Request $request)
     {
