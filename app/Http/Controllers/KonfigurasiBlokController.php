@@ -35,12 +35,13 @@ class KonfigurasiBlokController extends Controller
         //     ];
         // }));
 
-        $blokGantangans = BlokGantangan::with('blok', 'gantangan')
+        $blokGantangans = BlokGantangan::with('blok.burung.jenisBurung', 'blok.burung.kelas', 'gantangan')
             ->when($search, function ($query, $search) {
                 $query->whereHas('blok', fn($q) => $q->where('nama', 'like', "%$search%"))
                     ->orWhereHas('gantangan', fn($q) => $q->where('nomor', 'like', "%$search%"));
             })
             ->get();
+
 
         return view('korlap.konfigurasi_blok.index', compact('bloks', 'lombas', 'gantangans', 'blokGantangans'));
     }

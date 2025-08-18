@@ -215,6 +215,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Blok</th>
+                                    <th>Burung</th> <!-- ✅ Tambahkan ini -->
                                     <th>Gantangan</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -224,7 +225,12 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $item->blok?->nama ?? '[Blok Tidak Ditemukan]' }}</td>
-                                        <td>{{ $item->gantangan?->nomor ? 'No ' . $item->gantangan->nomor : '[Gantangan Tidak Ditemukan]' }}
+                                        <td>
+                                            {{ optional(optional($item->blok?->burung)->jenisBurung)->nama ?? '-' }} -
+                                            {{ optional(optional($item->blok?->burung)->kelas)->nama ?? '-' }}
+                                        </td> <!-- ✅ Kolom burung -->
+                                        <td>
+                                            {{ $item->gantangan?->nomor ? 'No ' . $item->gantangan->nomor : '[Gantangan Tidak Ditemukan]' }}
                                         </td>
                                         <td>
                                             <div class="dropdown">
@@ -233,8 +239,11 @@
                                                     <i class="fas fa-cog"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li><a class="dropdown-item"
-                                                            href="{{ route('konfigurasi-blok.gantangan.edit', $item->id) }}">Edit</a>
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('konfigurasi-blok.gantangan.edit', $item->id) }}">
+                                                            Edit
+                                                        </a>
                                                     </li>
                                                     <li>
                                                         <form
@@ -250,7 +259,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">Belum ada relasi blok-gantangan.</td>
+                                        <td colspan="5" class="text-center">Belum ada relasi blok-gantangan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
