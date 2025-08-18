@@ -288,7 +288,6 @@ class AdminController extends Controller
 
         $juriList = User::role('juri')->get();
 
-        // Mapping nama-nama bendera agar lebih jelas dan tidak tertukar
         $benderaMap = $tahapId == 1
             ? [
                 'penilaian_hijau' => 1,
@@ -307,13 +306,19 @@ class AdminController extends Controller
                     ->where('tahap_id', $tahapId)
                     ->where('bendera_id', $benderaId)
                     ->whereHas('burung', function ($q) use ($burungId, $kelasId) {
-                        $q->where('jenis_burung_id', $burungId)
-                            ->where('kelas_id', $kelasId);
+                        if ($burungId) {
+                            $q->where('jenis_burung_id', $burungId);
+                        }
+                        if ($kelasId) {
+                            $q->where('kelas_id', $kelasId);
+                        }
                     })
                     ->with('blokGantangan.gantangan')
                     ->get()
                     ->map(function ($p) {
-                        return ['nomor' => $p->blokGantangan->gantangan->nomor ?? '-'];
+                        return [
+                            'nomor' => $p->blokGantangan->gantangan->nomor ?? '-',
+                        ];
                     });
             }
         }

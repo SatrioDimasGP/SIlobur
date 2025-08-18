@@ -49,9 +49,6 @@
                     <option value="2" {{ $tahapId == 2 ? 'selected' : '' }}>Tahap Koncer</option>
                 </select>
             </div>
-            {{-- <div class="col-md-12 text-end">
-                <button type="submit" class="btn btn-primary">Terapkan Filter</button>
-            </div> --}}
         </form>
 
         {{-- Tabel --}}
@@ -62,7 +59,7 @@
             <div class="card-body">
                 <table id="datatable-main" class="table table-bordered table-striped text-sm">
                     <thead>
-                        <tr>
+                        <tr id="pantau-thead">
                             <th>No</th>
                             <th>Nama Juri</th>
                             @foreach ($labels as $label => $color)
@@ -71,6 +68,7 @@
                         </tr>
                     </thead>
                     <tbody id="pantau-tbody">
+                        {{-- isi awal, nanti akan dioverride JS --}}
                         @foreach ($juriList as $index => $juri)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
@@ -103,17 +101,58 @@
     <script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
 
     <script>
-        function fetchPantauData() {
-            console.log('fetchPantauData() dipanggil');
+        function getLabels(tahapId) {
+            return tahapId == 1 ? {
+                Hijau: 'success',
+                Putih: 'secondary',
+                Hitam: 'dark'
+            } : {
+                Merah: 'danger',
+                Biru: 'primary',
+                Kuning: 'warning text-dark'
+            };
+        }
 
+        function renderTable(response, tahapId) {
+            const labels = getLabels(tahapId);
+
+            // update header
+            const theadRow = $('#pantau-thead');
+            theadRow.empty().append('<th>No</th><th>Nama Juri</th>');
+            Object.keys(labels).forEach(label => {
+                theadRow.append(`<th>${label}</th>`);
+            });
+
+            // update body
+            const tbody = $('#pantau-tbody');
+            tbody.empty();
+            response.data.forEach((juri, index) => {
+                let row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>${juri.nama}</td>`;
+
+                Object.keys(labels).forEach(label => {
+                    let key = 'penilaian_' + label.toLowerCase();
+                    let badges = '';
+                    (juri[key] || []).forEach(p => {
+                        let colorParts = labels[label].split(' ');
+                        let bg = 'bg-' + colorParts[0];
+                        let textClass = colorParts[1] ?? '';
+                        badges += `<span class="badge ${bg} ${textClass}">${p.nomor}</span> `;
+                    });
+                    row += `<td>${badges}</td>`;
+                });
+
+                row += `</tr>`;
+                tbody.append(row);
+            });
+        }
+
+        function fetchPantauData() {
             const burungId = $('select[name="burung_id"]').val();
             const kelasId = $('select[name="kelas_id"]').val();
             const tahapId = $('select[name="tahap_id"]').val();
-            console.log({
-                burungId,
-                kelasId,
-                tahapId
-            });
+
             if (!burungId || !kelasId || !tahapId) return;
 
             $.ajax({
@@ -125,42 +164,7 @@
                     tahap_id: tahapId
                 },
                 success: function(response) {
-                    console.log('Fetch berhasil:', response); // <--- Tambahkan baris ini
-
-                    const labels = tahapId == 1 ? {
-                        Hijau: 'success',
-                        Putih: 'secondary',
-                        Hitam: 'dark'
-                    } : {
-                        Merah: 'danger',
-                        Biru: 'primary',
-                        Kuning: 'warning text-dark'
-                    };
-
-                    const tbody = $('#pantau-tbody');
-                    tbody.empty();
-
-                    response.data.forEach((juri, index) => {
-                        let row = `<tr>
-                            <td>${index + 1}</td>
-                            <td>${juri.nama}</td>`;
-
-                        Object.keys(labels).forEach(label => {
-                            let key = 'penilaian_' + label.toLowerCase();
-                            let badges = '';
-                            (juri[key] || []).forEach(p => {
-                                let colorParts = labels[label].split(' ');
-                                let bg = 'bg-' + colorParts[0];
-                                let textClass = colorParts[1] ?? '';
-                                badges +=
-                                    `<span class="badge ${bg} ${textClass}">${p.nomor}</span> `;
-                            });
-                            row += `<td>${badges}</td>`;
-                        });
-
-                        row += `</tr>`;
-                        tbody.append(row);
-                    });
+                    renderTable(response, tahapId);
                 },
                 error: function(err) {
                     console.error('Gagal mengambil data:', err);
@@ -170,9 +174,7 @@
 
         $(document).ready(function() {
             fetchPantauData(); // load awal
-
-            // auto refresh tiap 5 detik
-            setInterval(fetchPantauData, 5000);
+            setInterval(fetchPantauData, 5000); // auto refresh tiap 5 detik
         });
     </script>
 @endpush
