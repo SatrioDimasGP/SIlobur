@@ -25,7 +25,9 @@
                     kelasSelect.disabled = true
                     kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
 
-                    fetch(`/ajax/kelas?jenis_burung_id=${jenisId}`)
+                    const lombaId = {{ $lomba->id }};
+                    fetch(`/ajax/kelas?jenis_burung_id=${jenisId}&lomba_id=${lombaId}`)
+
                         .then(r => r.json())
                         .then(data => {
                             data.kelas.forEach(kls => {
@@ -65,10 +67,10 @@
                     </thead>
                     <tbody>
                         ${data.bloks.map(blok => `
-                        <tr class="border-t">
-                            <td class="px-4 py-2">${blok.nama}</td>
-                            <td class="px-4 py-2">
-                                ${blok.sudah_dinilai ? `
+                                                <tr class="border-t">
+                                                    <td class="px-4 py-2">${blok.nama}</td>
+                                                    <td class="px-4 py-2">
+                                                        ${blok.sudah_dinilai ? `
                             <button class="bg-gray-400 !text-black font-bold py-2 px-4 rounded w-auto cursor-not-allowed" disabled>
                                 Sudah Dinilai
                             </button>
@@ -79,14 +81,14 @@
                             Lakukan Penilaian
                             </button>
                             `}
-                                </td>
-                            </tr>
-                        `).join('')}
+                                                        </td>
+                                                    </tr>
+                                                `).join('')}
                     </tbody>
                 `;
-                blokList.appendChild(tbl);
-                })
-                .catch(() => alert('Gagal memuat data blok'));
+                            blokList.appendChild(tbl);
+                        })
+                        .catch(() => alert('Gagal memuat data blok'));
                 };
             </script>
         @endif
@@ -127,7 +129,9 @@
 
             if (!jenisId) return;
 
-            fetch(`/ajax/kelas?jenis_burung_id=${jenisId}`)
+            const lombaId = {{ $lomba->id }};
+            fetch(`/ajax/kelas?jenis_burung_id=${jenisId}&lomba_id=${lombaId}`)
+
                 .then(r => r.json())
                 .then(data => {
                     data.kelas.forEach(kls => {
@@ -171,10 +175,10 @@
                     </thead>
                     <tbody>
                         ${data.bloks.map(blok => `
-                            <tr class="border-t">
-                                <td class="px-4 py-2">${blok.nama}</td>
-                                <td class="px-4 py-2">
-                                    ${blok.sudah_dinilai ? `
+                                    <tr class="border-t">
+                                        <td class="px-4 py-2">${blok.nama}</td>
+                                        <td class="px-4 py-2">
+                                            ${blok.sudah_dinilai ? `
                             <button class="bg-gray-400 !text-black font-bold py-2 px-4 rounded w-auto cursor-not-allowed" disabled>
                                 Sudah Dinilai
                             </button>
@@ -185,9 +189,9 @@
                                 Lakukan Penilaian
                             </button>
                         `}
-                        </td>
-                        </tr>
-                        `).join('')}
+                                </td>
+                                </tr>
+                                `).join('')}
                         </tbody>
                         `;
                     blokList.appendChild(tbl);

@@ -153,13 +153,17 @@ class JuriController extends Controller
     public function getKelas(Request $request)
     {
         $jenis_burung_id = $request->jenis_burung_id;
+        $lomba_id = $request->lomba_id;
 
         $kelas = Kelas::whereIn('id', function ($query) use ($jenis_burung_id) {
             $query->select('kelas_id')
                 ->from('burungs')
                 ->where('jenis_burung_id', $jenis_burung_id)
                 ->whereNull('deleted_at');
-        })->get();
+        })
+            ->where('lomba_id', $lomba_id)
+            ->whereNull('deleted_at')
+            ->get();
 
         return response()->json([
             'kelas' => $kelas,
