@@ -93,7 +93,7 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-Route::middleware(['auth', 'role:admin|superadmin|korlap|'])->group(function () {
+Route::middleware(['auth', 'role:admin|superadmin|korlap'])->group(function () {
 
     // Monitor Penilaian
     Route::get('/monitor-penilaian', [AdminController::class, 'monitorPenilaian'])->name('admin.monitor.index');
@@ -106,6 +106,8 @@ Route::middleware(['auth', 'role:admin|superadmin|korlap|'])->group(function () 
     // Pantau Lomba Realtime
     Route::get('/pantau-lomba', [AdminController::class, 'pantauLomba'])->name('admin.pantau_lomba');
     Route::get('/admin/pantau-lomba/data', [AdminController::class, 'pantauLombaData'])->name('admin.pantau_lomba.data');
+    Route::get('/admin/ajax/kelas', [AdminController::class, 'getKelas'])->name('admin.ajax.kelas');
+    Route::get('/admin/ajax/burung', [AdminController::class, 'getBurung'])->name('admin.ajax.burung');
 });
 
 
@@ -114,8 +116,8 @@ Route::middleware(['auth', 'role:juri'])->group(function () {
     Route::get('/penilaian-ajuan', [JuriController::class, 'pilihLomba'])->name('penilaian-ajuan.pilih-lomba');
 
     // Ajax data
-    Route::get('/ajax/blok', [JuriController::class, 'getBlok'])->name('ajax.blok');
-    Route::get('/ajax/kelas', [JuriController::class, 'getKelas'])->name('ajax.kelas');
+    Route::get('/juri/ajax/kelas', [JuriController::class, 'getKelas'])->name('juri.ajax.kelas');
+    Route::get('/juri/ajax/blok', [JuriController::class, 'getBlok'])->name('juri.ajax.blok');
 
     // Menu: Penilaian Tahap Ajuan
     Route::get('/penilaian-ajuan/{lombaId}', [JuriController::class, 'ajuanIndex'])->name('penilaian-ajuan.index');

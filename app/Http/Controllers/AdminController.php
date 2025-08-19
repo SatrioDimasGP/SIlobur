@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Lomba;
 use App\Models\Penilaian;
 use App\Models\User;
 use App\Models\Bendera;
@@ -9,6 +10,7 @@ use App\Models\Burung;
 use App\Models\Kelas;
 use App\Models\JenisBurung;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -236,12 +238,13 @@ class AdminController extends Controller
 
     public function pantauLomba(Request $request)
     {
-        $burungId = $request->burung_id;
+        $burungId = $request->jenis_burung_id;
         $kelasId = $request->kelas_id;
         $tahapId = $request->tahap_id ?? 1;
 
-        $listBurung = JenisBurung::all();
-        $listKelas = Kelas::all();
+        $listLomba = Lomba::all(); // ambil semua lomba
+        $listBurung = []; // awal kosong (akan diisi ajax)
+        $listKelas = [];  // awal kosong
         $juriList = User::role('juri')->get();
 
         $benderaMap = $tahapId == 1
@@ -275,14 +278,16 @@ class AdminController extends Controller
 
         return view('admin.pantau_lomba.index', compact(
             'juriList',
+            'listLomba',
             'listBurung',
-            'listKelas'
+            'listKelas',
+            'tahapId'
         ));
     }
 
     public function pantauLombaData(Request $request)
     {
-        $burungId = $request->burung_id;
+        $burungId = $request->jenis_burung_id;
         $kelasId = $request->kelas_id;
         $tahapId = $request->tahap_id ?? 1;
 
@@ -332,5 +337,52 @@ class AdminController extends Controller
                 return $result;
             }),
         ]);
+    }
+
+    public function getBurung(Request $request)
+    {
+        $lombaId = $request->lomba_id;
+
+        $burung = JenisBurung::whereIn('id', function ($q) use ($lombaId) {
+            $q->select('jenis_burung_id')
+                ->from('burungs')
+                ->whereNull('deleted_at')
+                ->whereIn('kelas_id', function ($sub) use ($lombaId) {
+                    $sub->select('id')
+                        ->from('kelas')
+                        ->where('lomba_id', $lombaId)
+                        ->whereNull('deleted_at');
+                });
+        })->get();
+
+        return response()->json(['burung' => $burung]);
+    }
+
+    public function getKelas(Request $request)
+    {
+        $lombaId = $request->lomba_id;
+        $jenisBurungId = $request->jenis_burung_id; // ubah biar jelas
+
+        // dd([
+        //     'lombaId' => $lombaId,
+        //     'jenisBurungId' => $jenisBurungId,
+        //     'burungs' => DB::table('burungs')
+        //         ->where('jenis_burung_id', $jenisBurungId)
+        //         ->pluck('kelas_id'),
+        //     'kelas' => DB::table('kelas')
+        //         ->where('lomba_id', $lombaId)
+        //         ->pluck('id'),
+        // ]);
+
+        $kelas = Kelas::where('lomba_id', $lombaId)
+            ->whereIn('id', function ($q) use ($jenisBurungId) {
+                $q->select('kelas_id')
+                    ->from('burungs')
+                    ->where('jenis_burung_id', $jenisBurungId)
+                    ->whereNull('deleted_at');
+            })
+            ->get();
+
+        return response()->json(['kelas' => $kelas]);
     }
 }

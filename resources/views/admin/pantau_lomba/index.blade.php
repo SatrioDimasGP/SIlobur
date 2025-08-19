@@ -22,29 +22,35 @@
 
         {{-- Filter Form --}}
         <form method="GET" action="{{ route('admin.pantau_lomba') }}" class="row mb-4 g-3">
-            <div class="col-md-4">
-                <select name="burung_id" class="form-select" required>
+            {{-- Pilih Lomba --}}
+            <div class="col-md-3">
+                <select name="lomba_id" id="lomba_id" class="form-select" required>
+                    <option value="">Pilih Lomba</option>
+                    @foreach ($listLomba as $lomba)
+                        <option value="{{ $lomba->id }}" {{ request('lomba_id') == $lomba->id ? 'selected' : '' }}>
+                            {{ $lomba->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Pilih Jenis Burung --}}
+            <div class="col-md-3">
+                <select name="burung_id" id="burung_id" class="form-select" required>
                     <option value="">Pilih Jenis Burung</option>
-                    @foreach ($listBurung as $jenisBurung)
-                        <option value="{{ $jenisBurung->id }}"
-                            {{ request('burung_id') == $jenisBurung->id ? 'selected' : '' }}>
-                            {{ $jenisBurung->nama }}
-                        </option>
-                    @endforeach
                 </select>
             </div>
-            <div class="col-md-4">
-                <select name="kelas_id" class="form-select" required>
+
+            {{-- Pilih Kelas --}}
+            <div class="col-md-3">
+                <select name="kelas_id" id="kelas_id" class="form-select" required>
                     <option value="">Pilih Kelas</option>
-                    @foreach ($listKelas as $kelas)
-                        <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
-                            {{ $kelas->nama }}
-                        </option>
-                    @endforeach
                 </select>
             </div>
-            <div class="col-md-4">
-                <select name="tahap_id" class="form-select" required>
+
+            {{-- Tahap --}}
+            <div class="col-md-3">
+                <select name="tahap_id" id="tahap_id" class="form-select" required>
                     <option value="1" {{ $tahapId == 1 ? 'selected' : '' }}>Tahap Ajuan</option>
                     <option value="2" {{ $tahapId == 2 ? 'selected' : '' }}>Tahap Koncer</option>
                 </select>
@@ -175,6 +181,37 @@
         $(document).ready(function() {
             fetchPantauData(); // load awal
             setInterval(fetchPantauData, 5000); // auto refresh tiap 5 detik
+        });
+
+        $('#lomba_id').on('change', function() {
+            const lombaId = $(this).val();
+            $('#burung_id').html('<option value="">Pilih Jenis Burung</option>');
+            $('#kelas_id').html('<option value="">Pilih Kelas</option>');
+            if (!lombaId) return;
+
+            $.get("{{ route('admin.ajax.burung') }}", {
+                lomba_id: lombaId
+            }, function(res) {
+                res.burung.forEach(b => {
+                    $('#burung_id').append(`<option value="${b.id}">${b.nama}</option>`);
+                });
+            });
+        });
+
+        $('#burung_id').on('change', function() {
+            const lombaId = $('#lomba_id').val();
+            const burungId = $(this).val();
+            $('#kelas_id').html('<option value="">Pilih Kelas</option>');
+            if (!burungId) return;
+
+            $.get("{{ route('admin.ajax.kelas') }}", {
+                lomba_id: lombaId,
+                jenis_burung_id: burungId // perbaiki di sini
+            }, function(res) {
+                res.kelas.forEach(k => {
+                    $('#kelas_id').append(`<option value="${k.id}">${k.nama}</option>`);
+                });
+            });
         });
     </script>
 @endpush

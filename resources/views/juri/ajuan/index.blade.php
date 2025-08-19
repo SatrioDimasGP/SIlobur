@@ -26,7 +26,7 @@
                     kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
 
                     const lombaId = {{ $lomba->id }};
-                    fetch(`/ajax/kelas?jenis_burung_id=${jenisId}&lomba_id=${lombaId}`)
+                    fetch(`/juri/ajax/kelas?jenis_burung_id=${jenisId}&lomba_id=${lombaId}`)
 
                         .then(r => r.json())
                         .then(data => {
@@ -48,7 +48,7 @@
 
                     if (!kelasId || !jenisId) return;
 
-                    fetch(`/ajax/blok?jenis_burung_id=${jenisId}&kelas_id=${kelasId}&lomba_id=${lombaId}`)
+                    fetch(`/juri/ajax/blok?jenis_burung_id=${jenisId}&kelas_id=${kelasId}&lomba_id=${lombaId}`)
                         .then(r => r.json())
                         .then(data => {
                             if (data.bloks.length === 0) {
@@ -130,7 +130,7 @@
             if (!jenisId) return;
 
             const lombaId = {{ $lomba->id }};
-            fetch(`/ajax/kelas?jenis_burung_id=${jenisId}&lomba_id=${lombaId}`)
+            fetch(`/juri/ajax/kelas?jenis_burung_id=${jenisId}&lomba_id=${lombaId}`)
 
                 .then(r => r.json())
                 .then(data => {
@@ -156,7 +156,7 @@
 
             if (!kelasId || !jenisId) return;
 
-            fetch(`/ajax/blok?jenis_burung_id=${jenisId}&kelas_id=${kelasId}&lomba_id={{ $lomba->id }}`)
+            fetch(`/juri/ajax/blok?jenis_burung_id=${jenisId}&kelas_id=${kelasId}&lomba_id={{ $lomba->id }}`)
                 .then(r => r.json())
                 .then(data => {
                     if (data.bloks.length === 0) {

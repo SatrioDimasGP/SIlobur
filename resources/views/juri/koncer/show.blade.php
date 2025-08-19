@@ -55,7 +55,7 @@
 
                     if (!jenisId) return;
 
-                    fetch(`/ajax/kelas?jenis_burung_id=${jenisId}`)
+                    fetch(`/juri/ajax/kelas?jenis_burung_id=${jenisId}&lomba_id={{ $lomba->id ?? 'null' }}`)
                         .then(r => r.json())
                         .then(data => {
                             data.kelas.forEach(kls => {
