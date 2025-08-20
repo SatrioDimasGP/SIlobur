@@ -14,20 +14,22 @@
         @if (session('kelas_id'))
             <script>
                 window.onload = function() {
-                    const kelasId = {{ session('kelas_id') }};
-                    const jenisId = {{ session('jenis_id') }};
-                    const lombaId = {{ session('lomba_id') }};
                     const jenisSelect = document.getElementById('jenis_burung_id');
                     const kelasSelect = document.getElementById('kelas_id');
+                    const blokList = document.getElementById('blok-list');
 
-                    jenisSelect.value = jenisId
+                    const jenisId = {{ session('jenis_id') ?? 'null' }};
+                    const kelasId = {{ session('kelas_id') ?? 'null' }};
+                    const lombaId = {{ session('lomba_id') ?? $lomba->id }};
 
-                    kelasSelect.disabled = true
+                    if (!jenisId || !kelasId) return;
+
+                    jenisSelect.value = jenisId;
+                    kelasSelect.disabled = true;
                     kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
 
-                    const lombaId = {{ $lomba->id }};
+                    // Load kelas
                     fetch(`/juri/ajax/kelas?jenis_burung_id=${jenisId}&lomba_id=${lombaId}`)
-
                         .then(r => r.json())
                         .then(data => {
                             data.kelas.forEach(kls => {
@@ -37,17 +39,11 @@
                                 kelasSelect.appendChild(opt);
                             });
                             kelasSelect.disabled = false;
-                            kelasSelect.value = kelasId
+                            kelasSelect.value = kelasId;
                         })
                         .catch(() => alert('Gagal memuat data kelas'));
 
-                    const blokList = document.getElementById('blok-list'); // Pastikan ada ID-nya di elemen
-
-                    if (!blokList) return;
-                    blokList.innerHTML = '';
-
-                    if (!kelasId || !jenisId) return;
-
+                    // Load blok
                     fetch(`/juri/ajax/blok?jenis_burung_id=${jenisId}&kelas_id=${kelasId}&lomba_id=${lombaId}`)
                         .then(r => r.json())
                         .then(data => {
@@ -59,33 +55,33 @@
                             const tbl = document.createElement('table');
                             tbl.className = 'table-auto w-full bg-white shadow-md rounded-lg';
                             tbl.innerHTML = `
-                    <thead class="bg-gray-100 text-left">
-                        <tr>
-                            <th class="px-4 py-2">Nama Blok</th>
-                            <th class="px-4 py-2">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.bloks.map(blok => `
-                                                <tr class="border-t">
-                                                    <td class="px-4 py-2">${blok.nama}</td>
-                                                    <td class="px-4 py-2">
-                                                        ${blok.sudah_dinilai ? `
-                            <button class="bg-gray-400 !text-black font-bold py-2 px-4 rounded w-auto cursor-not-allowed" disabled>
-                                Sudah Dinilai
-                            </button>
-                        ` : `
-                            <button type="button"
-                            class="bg-blue-500 hover:bg-blue-700 !text-black font-bold py-2 px-4 rounded w-auto"
-                            onclick="window.location.href='/penilaian-ajuan/${lombaId}/${blok.id}?jenis_burung_id=${jenisId}&kelas_id=${kelasId}'">
-                            Lakukan Penilaian
-                            </button>
-                            `}
-                                                        </td>
-                                                    </tr>
-                                                `).join('')}
-                    </tbody>
-                `;
+                <thead class="bg-gray-100 text-left">
+                    <tr>
+                        <th class="px-4 py-2">Nama Blok</th>
+                        <th class="px-4 py-2">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.bloks.map(blok => `
+                                    <tr class="border-t">
+                                        <td class="px-4 py-2">${blok.nama}</td>
+                                        <td class="px-4 py-2">
+                                            ${blok.sudah_dinilai ? `
+                                    <button class="bg-gray-400 !text-black font-bold py-2 px-4 rounded w-auto cursor-not-allowed" disabled>
+                                        Sudah Dinilai
+                                    </button>
+                                ` : `
+                                    <button type="button"
+                                        class="bg-blue-500 hover:bg-blue-700 !text-black font-bold py-2 px-4 rounded w-auto"
+                                        onclick="window.location.href='/penilaian-ajuan/${lombaId}/${blok.id}?jenis_burung_id=${jenisId}&kelas_id=${kelasId}'">
+                                        Lakukan Penilaian
+                                    </button>
+                                `}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                </tbody>
+            `;
                             blokList.appendChild(tbl);
                         })
                         .catch(() => alert('Gagal memuat data blok'));
@@ -175,10 +171,10 @@
                     </thead>
                     <tbody>
                         ${data.bloks.map(blok => `
-                                    <tr class="border-t">
-                                        <td class="px-4 py-2">${blok.nama}</td>
-                                        <td class="px-4 py-2">
-                                            ${blok.sudah_dinilai ? `
+                                        <tr class="border-t">
+                                            <td class="px-4 py-2">${blok.nama}</td>
+                                            <td class="px-4 py-2">
+                                                ${blok.sudah_dinilai ? `
                             <button class="bg-gray-400 !text-black font-bold py-2 px-4 rounded w-auto cursor-not-allowed" disabled>
                                 Sudah Dinilai
                             </button>
@@ -189,9 +185,9 @@
                                 Lakukan Penilaian
                             </button>
                         `}
-                                </td>
-                                </tr>
-                                `).join('')}
+                                    </td>
+                                    </tr>
+                                    `).join('')}
                         </tbody>
                         `;
                     blokList.appendChild(tbl);
