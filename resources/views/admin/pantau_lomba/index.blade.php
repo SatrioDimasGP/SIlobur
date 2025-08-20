@@ -165,6 +165,7 @@
                 url: "{{ route('admin.pantau_lomba.data') }}",
                 method: "GET",
                 data: {
+                    lomba_id: $('#lomba_id').val(), // tambahin ini
                     burung_id: burungId,
                     kelas_id: kelasId,
                     tahap_id: tahapId

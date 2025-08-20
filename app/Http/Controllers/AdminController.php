@@ -287,11 +287,25 @@ class AdminController extends Controller
 
     public function pantauLombaData(Request $request)
     {
-        $burungId = $request->jenis_burung_id;
+        $lombaId = $request->lomba_id;
+        $burungId = $request->burung_id;
         $kelasId = $request->kelas_id;
         $tahapId = $request->tahap_id ?? 1;
 
-        $juriList = User::role('juri')->get();
+        $juriList = User::role('juri')
+            ->whereIn('id', function ($q) use ($lombaId, $burungId, $kelasId) {
+                $q->select('jt.user_id')
+                    ->from('juri_tugas as jt')
+                    ->join('bloks as bl', 'bl.id', '=', 'jt.blok_id')
+                    ->join('burungs as b', 'b.id', '=', 'bl.burung_id')
+                    ->where('jt.lomba_id', $lombaId)
+                    ->when($kelasId, fn($q) => $q->where('b.kelas_id', $kelasId))
+                    ->when($burungId, fn($q) => $q->where('b.jenis_burung_id', $burungId))
+                    ->whereNull('jt.deleted_at')
+                    ->whereNull('bl.deleted_at')
+                    ->whereNull('b.deleted_at');
+            })
+            ->get();
 
         $benderaMap = $tahapId == 1
             ? [
