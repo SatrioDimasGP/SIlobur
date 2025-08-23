@@ -22,9 +22,14 @@ use Illuminate\Support\Facades\Log;
 class JuriController extends Controller
 {
     // Menampilkan halaman pilih lomba
+    // public function pilihLomba()
+    // {
+    //     $lombas = Lomba::where('status_lomba_id', 1)->get(); // Ambil lomba yang statusnya aktif
+    //     return view('juri.ajuan.pilih_lomba', compact('lombas'));
+    // }
     public function pilihLomba()
     {
-        $lombas = Lomba::where('status_lomba_id', 1)->get(); // Ambil lomba yang statusnya aktif
+        $lombas = Lomba::all();
         return view('juri.ajuan.pilih_lomba', compact('lombas'));
     }
 
@@ -307,7 +312,8 @@ class JuriController extends Controller
 
     public function koncerIndex()
     {
-        $lombas = Lomba::where('status_lomba_id', 1)->get(); // Ambil lomba yang statusnya aktif
+        // $lombas = Lomba::where('status_lomba_id', 1)->get(); // Ambil lomba yang statusnya aktif
+        $lombas = Lomba::all();
         return view('juri.koncer.index', compact('lombas'));
     }
 
